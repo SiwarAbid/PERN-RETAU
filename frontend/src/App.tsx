@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import FloatingIngredients from './components/FloatingIngredients';
+import AuthCard from './components/AuthCard';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [isDark, setIsDark] = useState<boolean>(false);
+
+  useEffect(() => {
+    const updateTheme = (): void => {
+      const hour = new Date().getHours();
+      // Mode sombre entre 18h et 6h
+      setIsDark(hour >= 18 || hour < 6);
+    };
+
+    updateTheme();
+    const interval = setInterval(updateTheme, 60000); // Vérifier toutes les minutes
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className={`min-h-screen transition-all duration-1000 relative overflow-hidden ${
+      isDark 
+        ? 'bg-gradient-to-br from-[#9f754c] via-[#9f754c]/80 to-[#f8bb4c]/60' 
+        : 'bg-gradient-to-br from-[#fef6e5] via-[#f9d1b8]/50 to-[#f8bb4c]/30'
+    }`}>
+      <FloatingIngredients isDark={isDark} />
+      
+      {/* Overlay décoratif */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
+      
+      <div className="relative z-20 min-h-screen flex items-center justify-center p-4">
+        <AuthCard isDark={isDark} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
 
-export default App
+      {/* Indicateur de mode */}
+      <div className={`fixed top-4 right-4 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
+        isDark 
+          ? 'bg-[#9f754c]/20 text-[#fef6e5] border border-[#f8bb4c]/30' 
+          : 'bg-[#fef6e5]/80 text-[#9f754c] border border-[#f9d1b8]/50'
+      }`}>
+        {isDark ? '🌙 Ambiance du soir' : '☀️ Fraîcheur du jour'}
+      </div>
+    </div>
+  );
+};
+
+export default App;
