@@ -68,6 +68,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
       // Simulation d'authentification avec validation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // laison avec back **
       if (formData.email === 'test@example.com' && formData.password === 'password') {
         alert('Bienvenue dans notre cuisine ! 👨‍🍳');
       } else {
@@ -86,6 +87,36 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
   const handleSocialLogin = useCallback((provider: SocialProvider['name']) => {
     console.log(`Connexion avec ${provider}`);
     // Logique de connexion sociale ici
+    const popup = window.open(
+      `http://localhost:5000/auth/${provider}`,
+      'oauthPopup',
+      'width=500,height=600'
+    );
+    console.log("popup :",popup);
+    if (!popup) return;
+    // Écoute les messages du backend (via postMessage)
+    const messageListener = (event: MessageEvent) => {
+      console.log('Message reçu :', event.data);
+      if (event.origin !== 'http://localhost:5000') return;
+      if (!event.data.sucess) {
+        setError({
+          message: event.data.message,
+          field: 'general'
+        });      
+        console.log('Erreur de connexion : ', event.data.message);
+        return;
+        }
+      const { token } = event.data;
+      if (token) {
+        localStorage.setItem('token', token);
+        console.log('Token reçu :', token);
+        popup.close();
+        window.removeEventListener('message', messageListener);
+        // Redirige ou mets à jour le contexte
+      }
+    };
+
+    window.addEventListener('message', messageListener);
   }, []);
 
   const handleGuestAccess = useCallback(() => {
@@ -108,7 +139,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
   return (
     <div className={`relative z-10 w-full max-w-md mx-auto p-5 rounded-3xl shadow-2xl backdrop-blur-sm transition-all duration-500 ${
       isDark 
-        ? 'bg-[#9f754c]/20 border border-[#f8bb4c]/30' 
+        ? 'bg-[#000000]/50 border border-[#f8bb4c]/30' 
         : 'bg-[#fef6e5]/80 border border-[#f9d1b8]/50'
     }`}>
       <div className="text-center mb-6">
