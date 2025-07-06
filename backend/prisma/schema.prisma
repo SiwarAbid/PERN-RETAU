@@ -18,7 +18,7 @@ model User {
   name     String
   email    String  @unique
   password String
-  provider String  @default("local")
+  provider String  @default("LOCAL")
   role     Role    @default(CLIENT)
   createdAt DateTime @default(now())
 }

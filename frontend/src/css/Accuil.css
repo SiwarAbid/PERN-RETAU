@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Couleurs principales */
+    --primary-50:   #FFF7ED;
+    --primary-100:  #FFEDD5;
+    --primary-200:  #FED7AA;
+    --primary-300:  #FDBA74;
+    --primary-400:  #FB923C;
+    --primary-500:  #F97316;
+    --primary-600:  #EA580C;
+    --primary-700:  #C2410C;
+    --primary-800:  #9A3412;
+    --primary-900:  #7C2D12;
+
+    --secondary-50:   #FAF7F2;
+    --secondary-100:  #F5F0E5;
+    --secondary-200:  #EBE1CC;
+    --secondary-300:  #E1D2B3;
+    --secondary-400:  #D7C399;
+    --secondary-500:  #CDB480;
+    --secondary-600:  #B8A066;
+    --secondary-700:  #A38C4D;
+    --secondary-800:  #8E7833;
+    --secondary-900:  #79641A;
+
+    --accent-50:   #FDF2F2;
+    --accent-100:  #FCE5E5;
+    --accent-200:  #F8CCCC;
+    --accent-300:  #F4B2B2;
+    --accent-400:  #F09999;
+    --accent-500:  #EC7F7F;
+    --accent-600:  #E85C5C;
+    --accent-700:  #E43939;
+    --accent-800:  #C72E2E;
+    --accent-900:  #AA2323;
+
+    --neutral-50:   #F9F7F4;
+    --neutral-100:  #F3F0E9;
+    --neutral-200:  #E7E1D3;
+    --neutral-300:  #DBD2BD;
+    --neutral-400:  #CFC3A7;
+    --neutral-500:  #C3B491;
+    --neutral-600:  #A89B7A;
+    --neutral-700:  #8D8263;
+    --neutral-800:  #72694C;
+    --neutral-900:  #575035;
+
+    --brown-50:   #F7F3F0;
+    --brown-100:  #EFE7E1;
+    --brown-200:  #DFCFC3;
+    --brown-300:  #CFB7A5;
+    --brown-400:  #BF9F87;
+    --brown-500:  #AF8769;
+    --brown-600:  #9A7355;
+    --brown-700:  #855F41;
+    --brown-800:  #704B2D;
+    --brown-900:  #5B3719;
+
+    --noisette-50:   #F7F3F0;
+    --noisette-100:  #EFE7E1;
+    --noisette-200:  #DFCFC3;
+    --noisette-300:  #CFB7A5;
+    --noisette-400:  #BF9F87;
+    --noisette-500:  #AF8769;
+    --noisette-600:  #9A7355;
+    --noisette-700:  #855F41;
+    --noisette-800:  #704B2D;
+    --noisette-900:  #5B3719;
+
+    --vanille-50:   #FAF7F2;
+    --vanille-100:  #F5F0E5;
+    --vanille-200:  #EBE1CC;
+    --vanille-300:  #E1D2B3;
+    --vanille-400:  #D7C399;
+    --vanille-500:  #CDB480;
+    --vanille-600:  #B8A066;
+    --vanille-700:  #A38C4D;
+    --vanille-800:  #8E7833;
+    --vanille-900:  #79641A;
+
+    --background: var(--neutral-50);
+    --foreground: var(--brown-900);
+    --border: var(--secondary-200);
+  }
+
+  .dark {
+    --background: var(--brown-900);
+    --foreground: var(--neutral-50);
+    --border: var(--brown-700);
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+/* body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  } */
+}
+
+@layer components {
+  .btn-primary {
+    background-color: var(--primary-500);
+    color: white;
+    /* Ajoutez les autres styles Tailwind manuellement si besoin */
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+    transform: scale(1);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-600);
+    transform: scale(1.05);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border-width: 2px;
+    border-color: var(--primary-500);
+    color: var(--primary-500);
+    font-weight: 600;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+    transition-property: all;
+    transition-duration: 300ms;
+  }
+  .btn-secondary:hover {
+    background-color: var(--primary-500);
+    color: white;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-100);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--brown-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-500);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-600);
+}
+
+/* Smooth gradient backgrounds */
+.bg-gradient-warm {
+  background: linear-gradient(135deg,
+    var(--neutral-50) 0%,
+    var(--secondary-50) 50%,
+    var(--secondary-100) 100%
+  );
+}
+
+.dark .bg-gradient-warm {
+  background: linear-gradient(135deg,
+    var(--brown-900) 0%,
+    var(--brown-800) 50%,
+    var(--brown-700) 100%
+  );
+}

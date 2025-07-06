@@ -65,14 +65,30 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     setError(null);
 
     try {
-      // Simulation d'authentification avec validation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // laison avec back **
-      if (formData.email === 'test@example.com' && formData.password === 'password') {
+      const endpoint = authMode === 'login'
+        ? 'http://localhost:5000/auth/login'
+        : 'http://localhost:5000/auth/register';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Une erreur est survenue");
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
         alert('Bienvenue dans notre cuisine ! 👨‍🍳');
+        // Rediriger ou mettre à jour le contexte utilisateur ici si besoin
       } else {
-        throw new Error("Hmm... ce plat ne figure pas au menu, essaie encore 🍽️");
+        throw new Error("Réponse inattendue du serveur");
       }
     } catch (err) {
       setError({
@@ -82,7 +98,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData]);
+  }, [formData, authMode]);
 
   const handleSocialLogin = useCallback((provider: SocialProvider['name']) => {
     console.log(`Connexion avec ${provider}`);

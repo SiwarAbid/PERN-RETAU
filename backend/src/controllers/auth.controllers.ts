@@ -49,8 +49,7 @@ export async function login (req: Request, res: Response) {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ message: 'Email non trouvé' });
-    const error = req.flash('error'); // flash de passport
-    if (error) return res.status(401).json({ message: error });
+    console.log(" USER : ", user)
     if (user.provider !== 'LOCAL') return res.status(401).json({ message : 'Mode de connexion non supporté'})
     const match = await comparePasswords(password, user.password);
     if (!match) return res.status(401).json({ message: 'Mot de passe incorrect' });
@@ -64,6 +63,8 @@ export async function login (req: Request, res: Response) {
 };
 
 export const googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
+export const facebookAuth = passport.authenticate('facebook', { scope: ['public_profile', 'email'] });
+export const appleAuth = passport.authenticate('Apple', { scope: ['profile', 'email'] });
 
 export async function googleCallback (req: Request, res: Response, next: NextFunction) { 
   console.log('Requête reçue sur /google/callback', {
@@ -91,5 +92,59 @@ export async function googleCallback (req: Request, res: Response, next: NextFun
   })(req, res, next);
 };
 
+
+
+export async function facebookCallback (req: Request, res: Response, next: NextFunction) { 
+  console.log('Requête reçue sur /facebook/callback', {
+    headers: req.headers,
+    body: req.body
+  });
+  passport.authenticate('facebook' as Parameters<typeof passport.authenticate>[0], {
+    successRedirect: 'http://localhost:5173/sucess',
+    failureRedirect: 'http://localhost:5173/auth/login',
+    failureFlash: true,
+    session: false
+  }, (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.send(`<script>window.opener.postMessage({ sucess : false, message : "${info?.message}"},"*");
+      window.close();</script>`);
+
+    // ici on peut générer un JWT et rediriger
+    const token = generateToken({ id: user.id, role: user.role });
+    res.send(`
+      <script>
+        window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
+        window.close();
+      </script>
+    `); // vers frontend
+  })(req, res, next);
+};
+
+
+export async function appleCallback (req: Request, res: Response, next: NextFunction) { 
+  console.log('Requête reçue sur /apple/callback', {
+    headers: req.headers,
+    body: req.body
+  });
+  passport.authenticate('apple' as Parameters<typeof passport.authenticate>[0], {
+    successRedirect: 'http://localhost:5173/sucess',
+    failureRedirect: 'http://localhost:5173/auth/login',
+    failureFlash: true,
+    session: false
+  }, (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.send(`<script>window.opener.postMessage({ sucess : false, message : "${info?.message}"},"*");
+      window.close();</script>`);
+
+    // ici on peut générer un JWT et rediriger
+    const token = generateToken({ id: user.id, role: user.role });
+    res.send(`
+      <script>
+        window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
+        window.close();
+      </script>
+    `); // vers frontend
+  })(req, res, next);
+};
 
 
