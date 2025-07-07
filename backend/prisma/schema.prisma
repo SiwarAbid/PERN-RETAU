@@ -20,10 +20,70 @@ model User {
   password String
   provider String  @default("LOCAL")
   role     Role    @default(CLIENT)
+  reviews   Review[]
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
   CLIENT
   ADMIN
+  CHEF
 }
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  dishes      Dish[]
+}
+
+model Dish {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+  image       String?
+  isAvailable Boolean  @default(true)
+  rating      Float    @default(0)
+}
+
+
+model Review {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  dish      Dish    @relation(fields: [dishId], references: [id])
+  userId    Int
+  dishId    Int
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+}
+
+model Restau {
+  id          Int     @id @default(autoincrement())
+  name        String
+  aboutUs     String
+  address     String
+  phone       String
+  email       String
+  image       String
+  description String
+  logo        String
+  createdAt   DateTime @default(now())
+}
+
+model Contact {
+  id        Int     @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+

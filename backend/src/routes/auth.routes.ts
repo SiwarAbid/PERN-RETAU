@@ -1,39 +1,38 @@
-import express ,{ Request, Response, Router }  from 'express';
-import { login, register, googleAuth, googleCallback, facebookAuth, appleAuth, facebookCallback, appleCallback } from '../controllers/auth.controllers';
-import passport from 'passport';
-import { generateToken } from '../utils/jwt';
+import { Router } from 'express';
+import {
+  register,
+  login,
+  googleAuth,
+  googleCallback,
+  facebookAuth,
+  facebookCallback,
+  appleAuth,
+  appleCallback,
+} from '../controllers/auth.controllers';
 
-const router: Router = express.Router();
+const router = Router();
 
-// Inscription
+// == AUTHENTICATION ROUTES ==
 router.post('/register', (req, res, next) => {
   console.log("ROUTER REGISTER : REQ", req)
   register(req, res).catch(next);
 });
-
-// Connexion
-router.post('/login',(req, res, next) => {
+router.post('/login', (req, res, next) => {
   console.log("ROUTER LOGIN : REQ", req)
   login(req, res).catch(next);
 });
 
-// Démarrer OAuth
+// == SOCIAL AUTH ROUTES ==
+// Google
 router.get('/google', googleAuth);
-router.get('/facebook', facebookAuth);
-router.get('/apple', appleAuth);
+router.get('/google/callback', googleCallback);
 
-// Callback après succès Google
-router.get('/google/callback', (req, res, next) => {
-  console.log("ROUTER GOOGLE CALLBACK : REQ", req)
-  googleCallback(req, res, next).catch(next);
-});
-router.get('/facebook/callback', (req, res, next) => {
-  console.log("ROUTER FACEBOOK CALLBACK : REQ", req)
-  facebookCallback(req, res, next).catch(next);
-});
-router.get('/apple/callback', (req, res, next) => {
-console.log("ROUTER APPLE CALLBACK : REQ", req)
-  appleCallback(req, res, next).catch(next);
-});
+// Facebook
+router.get('/facebook', facebookAuth);
+router.get('/facebook/callback', facebookCallback);
+
+// Apple
+router.get('/apple', appleAuth);
+router.get('/apple/callback', appleCallback);
 
 export default router;

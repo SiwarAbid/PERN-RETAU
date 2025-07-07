@@ -31,7 +31,8 @@ export const register = async (req: Request, res: Response): Promise<void | Resp
     res.json({ token, user });
 
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur', err });
+    console.error("Erreur lors de l'enregistrement :", err);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
@@ -58,7 +59,7 @@ export async function login (req: Request, res: Response) {
     res.json({ token, user });
   } catch (err) {
     console.error('Erreur dans /login:', err);
-    res.status(500).json({ message: 'Erreur serveur', err });
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
@@ -66,85 +67,37 @@ export const googleAuth = passport.authenticate('google', { scope: ['profile', '
 export const facebookAuth = passport.authenticate('facebook', { scope: ['public_profile', 'email'] });
 export const appleAuth = passport.authenticate('Apple', { scope: ['profile', 'email'] });
 
-export async function googleCallback (req: Request, res: Response, next: NextFunction) { 
-  console.log('Requête reçue sur /google/callback', {
+// Handler générique pour les callbacks d'authentification sociale
+const socialAuthCallbackHandler = (strategy: 'google' | 'facebook' | 'apple') => 
+  (req: Request, res: Response, next: NextFunction) => {
+  console.log(`Requête reçue sur /${strategy}/callback`, {
     headers: req.headers,
-    body: req.body
+    body: req.body,
   });
-  passport.authenticate('google', {
+  passport.authenticate(strategy, {
     successRedirect: 'http://localhost:5173/sucess',
     failureRedirect: 'http://localhost:5173/auth/login',
     failureFlash: true,
     session: false
-  }, (err, user, info) => {
+  }, (err: any, user: { id: number; role: any; } | undefined, info: { message: string } | undefined) => {
     if (err) return next(err);
-    if (!user) return res.send(`<script>window.opener.postMessage({ sucess : false, message : "${info?.message}"},"*");
-      window.close();</script>`);
+    if (!user) {
+      const message = info?.message || 'Authentication failed.';
+      // Correction: 'success' au lieu de 'sucess' et origine explicite pour postMessage
+      return res.send(`<script>window.opener.postMessage({ success: false, message: "${message}" }, "http://localhost:5173"); window.close();</script>`);
+    }
 
-    // ici on peut générer un JWT et rediriger
+    // Génération du JWT et envoi au frontend via postMessage
     const token = generateToken({ id: user.id, role: user.role });
     res.send(`
       <script>
         window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
         window.close();
       </script>
-    `); // vers frontend
+    `);
   })(req, res, next);
 };
 
-
-
-export async function facebookCallback (req: Request, res: Response, next: NextFunction) { 
-  console.log('Requête reçue sur /facebook/callback', {
-    headers: req.headers,
-    body: req.body
-  });
-  passport.authenticate('facebook' as Parameters<typeof passport.authenticate>[0], {
-    successRedirect: 'http://localhost:5173/sucess',
-    failureRedirect: 'http://localhost:5173/auth/login',
-    failureFlash: true,
-    session: false
-  }, (err, user, info) => {
-    if (err) return next(err);
-    if (!user) return res.send(`<script>window.opener.postMessage({ sucess : false, message : "${info?.message}"},"*");
-      window.close();</script>`);
-
-    // ici on peut générer un JWT et rediriger
-    const token = generateToken({ id: user.id, role: user.role });
-    res.send(`
-      <script>
-        window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
-        window.close();
-      </script>
-    `); // vers frontend
-  })(req, res, next);
-};
-
-
-export async function appleCallback (req: Request, res: Response, next: NextFunction) { 
-  console.log('Requête reçue sur /apple/callback', {
-    headers: req.headers,
-    body: req.body
-  });
-  passport.authenticate('apple' as Parameters<typeof passport.authenticate>[0], {
-    successRedirect: 'http://localhost:5173/sucess',
-    failureRedirect: 'http://localhost:5173/auth/login',
-    failureFlash: true,
-    session: false
-  }, (err, user, info) => {
-    if (err) return next(err);
-    if (!user) return res.send(`<script>window.opener.postMessage({ sucess : false, message : "${info?.message}"},"*");
-      window.close();</script>`);
-
-    // ici on peut générer un JWT et rediriger
-    const token = generateToken({ id: user.id, role: user.role });
-    res.send(`
-      <script>
-        window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
-        window.close();
-      </script>
-    `); // vers frontend
-  })(req, res, next);
-};
-
-
+export const googleCallback = socialAuthCallbackHandler('google');
+export const facebookCallback = socialAuthCallbackHandler('facebook');
+export const appleCallback = socialAuthCallbackHandler('apple');
