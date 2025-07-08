@@ -35,4 +35,4 @@ router.get('/facebook/callback', facebookCallback);
 router.get('/apple', appleAuth);
 router.get('/apple/callback', appleCallback);
 
-export default router;
+export  {router as authRouter};

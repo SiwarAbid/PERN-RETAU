@@ -6,7 +6,13 @@ import './config/passport.facebookStrategy';
 import './config/passport.appleStrategy';
 import passport from 'passport';
 import { prisma } from './prisma';
-import authRoutes from './routes/auth.routes';
+import { authRouter } from './routes/auth.routes';
+import { userRouter } from './routes/user.routes';
+import { categoryRouter } from './routes/category.routes';
+import { dishRouter } from './routes/dish.routes';
+import { reviewRouter } from './routes/review.routes';
+import { restauRouter } from './routes/restau.routes';
+import { contactRouter } from './routes/contact.routes';
 import flash from 'connect-flash';
 
 const app = express();
@@ -33,6 +39,12 @@ app.get('/users', async (req, res) => {
 app.use(flash());
 app.use(passport.initialize());
 
-app.use('/auth', authRoutes);
+app.use('/auth', authRouter);
 
+app.use('/', userRouter);
+app.use('/', categoryRouter);
+app.use('/', dishRouter);
+app.use('/', reviewRouter);
+app.use('/', restauRouter);
+app.use('/', contactRouter);
 

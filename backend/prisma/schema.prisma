@@ -21,8 +21,8 @@ model User {
   provider String  @default("LOCAL")
   role     Role    @default(CLIENT)
   reviews   Review[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? 
 }
 
 enum Role {
