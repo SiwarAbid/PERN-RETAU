@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-@import "tailwindcss/preflight";
-@tailwind utilities;
- 
-
 @keyframes float-ingredient {
   0% {
     transform: translateY(100vh) rotate(0deg) scale(0.8);
