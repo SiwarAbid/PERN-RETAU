@@ -31,11 +31,10 @@ export const getRestaus = async (_req: Request, res: Response) => {
   }
 };
 
-// Récupérer un restaurant par ID
-export const getRestauById = async (req: Request, res: Response) => {
+export const getLastRestau = async (req: Request, res: Response) => {
   try {
-    const restau = await prisma.restau.findUnique({ where: { id: Number(req.params.id) } });
-    if (!restau) return res.status(404).json({ error: 'Restaurant non trouvé' });
+    const restau = await prisma.restau.findFirst({ orderBy: { createdAt: 'desc'} });
+    if (!restau) return res.status(404).json({ error: 'Aucun Restaurant trouvé' });
     res.json(restau);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

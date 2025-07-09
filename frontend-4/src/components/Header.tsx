@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Menu, X, User, Sun, Moon, ChefHat } from 'lucide-react';
+import { Menu, X, User, Sun, Moon, ChefHat, LogOut } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+
+  const navigate = useNavigate();
 
   const navItems = [
     { name: 'Accueil', href: '#accueil' },
@@ -13,6 +16,8 @@ const Header = () => {
     { name: 'À propos', href: '#about' },
     { name: 'Contact', href: '#contact' },
   ];
+
+  const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null;
 
   return (
     <header className="header">
@@ -56,8 +61,27 @@ const Header = () => {
 
             {/* Profile avatar */}
             <button className="profile-btn">
-              <User className="icon icon-white" />
+            { (user && user.image) 
+              ? <img src={user.image} className="icon icon-white" alt={user.name}  /> 
+              : <User className="icon icon-white" /> 
+            }
             </button>
+
+            {/* Logout button */}
+            <button 
+              className="logout-btn"
+              aria-label="Se déconnecter"
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/')
+                console.log('Déconnexion...');
+                alert('Déconnexion réussie !');
+              }}
+            >
+              <LogOut className="icon" />
+            </button>
+
 
             {/* Mobile menu button */}
             <button

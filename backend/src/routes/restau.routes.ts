@@ -2,7 +2,7 @@ import { Router } from "express";
 import { 
     createRestau,
     getRestaus,
-    getRestauById,
+    getLastRestau,
     updateRestau,
     deleteRestau,
 } from "../controllers/restau.controllers";
@@ -14,8 +14,8 @@ router.post('/add-restau', (req, res, next) => {
 });
 
 router.get('/restaus', getRestaus);
-router.get('/restau/:id', (req, res, next) => {
-    getRestauById(req, res).catch(next);
+router.get('/restau/last', (req, res, next) => {
+    getLastRestau(req, res).catch(next);
 });
 
 router.put('/update-restau/:id', updateRestau);

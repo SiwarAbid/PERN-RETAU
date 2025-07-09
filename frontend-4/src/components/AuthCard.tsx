@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Mail, Lock, Eye, EyeOff, ChefHat, Sparkles } from 'lucide-react';
 import type { AuthFormData, AuthError, AuthMode, SocialProvider } from '../types/auth';
-import { redirect } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthCardProps {
   isDark: boolean;
@@ -16,6 +16,8 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<AuthError | null>(null);
+
+  const navigate = useNavigate();
 
   const socialProviders: SocialProvider[] = [
     { 
@@ -88,7 +90,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
         localStorage.setItem('token', data.token);
         alert('Bienvenue dans notre cuisine ! 👨‍🍳');
         if ( localStorage.getItem('token') === data.token && data.role == 'CLIENT')
-          redirect('/accueil');
+          navigate(`/accueil`);
         else throw new Error("Your token is invalid")
         // Rediriger ou mettre à jour le contexte utilisateur ici si besoin
       } else {
@@ -102,22 +104,24 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, authMode]);
-    const handleSocialLogin = useCallback((provider: SocialProvider['name']) => {
+  }, [authMode, formData, navigate]);
+    const handleSocialLogin = useCallback(async (provider: SocialProvider['name']) => {
     console.log(`Connexion avec ${provider}`);
+    console.log(JSON.stringify({formData, provider}))
     // Logique de connexion sociale ici
-    const popup = window.open(
-      `http://localhost:5000/auth/${provider}`,
+    const popup: Window | null = window.open(
+      `http://localhost:5000/auth/${provider.toLowerCase()}/${authMode}`,
       'oauthPopup',
       'width=500,height=600'
     );
-    console.log("popup :",popup);
+
+    
     if (!popup) return;
     // Écoute les messages du backend (via postMessage)
     const messageListener = (event: MessageEvent) => {
-      console.log('Message reçu :', event.data);
+      console.log('Message reçu :', event);
       if (event.origin !== 'http://localhost:5000') return;
-      if (!event.data.sucess) {
+      if (!event.data.success) {
         setError({
           message: event.data.message,
           field: 'general'
@@ -125,25 +129,30 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
         console.log('Erreur de connexion : ', event.data.message);
         return;
         }
-      const { token } = event.data;
+      const { token, user } = event.data;
+      console.log('Token reçu :', token);
       if (token) {
         localStorage.setItem('token', token);
-        console.log('Token reçu :', token);
-        popup.close();
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        if (popup instanceof Window) {
+          popup.close();
+        }
         window.removeEventListener('message', messageListener);
-        alert('Bienvenue dans notre cuisine ! 👨‍🍳');
-        if ( localStorage.getItem('token') === token && event.data.role == 'CLIENT')
-        redirect('/accueil');
+        // alert('Bienvenue dans notre cuisine ! 👨‍🍳');
+        console.log(localStorage.getItem('token') === token && user.role == 'CLIENT')
+        if ( localStorage.getItem('token') === token && user.role == 'CLIENT')
+          navigate(`/accueil`);
         else throw new Error("Your token is invalid");
       }
     };
     window.addEventListener('message', messageListener);
-  }, []);
+  }, [authMode, formData, navigate]);
 
   const handleGuestAccess = useCallback(() => {
     console.log('Accès invité');
-    redirect('/accueil')
-  }, []);
+    navigate('/accueil')
+  }, [navigate]);
 
   const toggleAuthMode = useCallback(() => {
     setAuthMode(prev => prev === 'login' ? 'register' : 'login');

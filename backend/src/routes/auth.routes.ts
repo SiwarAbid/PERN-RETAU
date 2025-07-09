@@ -2,12 +2,17 @@ import { Router } from 'express';
 import {
   register,
   login,
-  googleAuth,
-  googleCallback,
-  facebookAuth,
-  facebookCallback,
-  appleAuth,
-  appleCallback,
+
+  googleCallbackRegister,
+  googleCallbackLogin,
+  // facebookAuth,
+  // facebookCallbackLogin,
+  // facebookCallbackRegister,
+  // appleAuth,
+  // appleCallbackLogin,
+  // appleCallbackRegister,
+  googleAuthLogin,
+  googleAuthRegister,
 } from '../controllers/auth.controllers';
 
 const router = Router();
@@ -24,15 +29,17 @@ router.post('/login', (req, res, next) => {
 
 // == SOCIAL AUTH ROUTES ==
 // Google
-router.get('/google', googleAuth);
-router.get('/google/callback', googleCallback);
+router.get('/google/login', googleAuthLogin);
+router.get('/google/register', googleAuthRegister);
+router.get('/google/login/callback', googleCallbackLogin);
+router.get('/google/register/callback', googleCallbackRegister);
 
 // Facebook
-router.get('/facebook', facebookAuth);
-router.get('/facebook/callback', facebookCallback);
+// router.get('/facebook', facebookAuth);
+// router.get('/facebook/callback', facebookCallback);
 
-// Apple
-router.get('/apple', appleAuth);
-router.get('/apple/callback', appleCallback);
+// // Apple
+// router.get('/apple', appleAuth);
+// router.get('/apple/callback', appleCallback);
 
 export  {router as authRouter};

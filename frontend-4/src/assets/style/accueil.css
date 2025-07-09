@@ -1,3 +1,4 @@
+@import url('./loading.css');
 
 :root {
   /* Palette de couleurs */
@@ -203,6 +204,8 @@ html {
 
 .profile-btn:hover {
   background-color: var(--primary-600);
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
 }
 
 .mobile-menu-btn {
@@ -213,6 +216,38 @@ html {
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  background: var(--primary-500);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ffffff;
+}
+
+.logout-btn:hover {
+  background: rgbavar(--primary-600);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.dark .logout-btn {
+  background: var(--primary-500);
+  border-color: rgba(248, 113, 113, 0.2);
+  color: #ffffff;
+}
+
+.dark .logout-btn:hover {
+  background: var(--primary-600);
+  border-color: rgba(248, 113, 113, 0.3);
 }
 
 @media (min-width: 768px) {

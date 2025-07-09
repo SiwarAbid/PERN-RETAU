@@ -5,6 +5,7 @@ import { generateToken } from '../utils/jwt';
 import validator from 'validator';
 import PasswordValidator from 'password-validator';
 import passport from 'passport';
+import e from 'connect-flash';
 
 export const register = async (req: Request, res: Response): Promise<void | Response> => {
   const { email, password } = req.body;
@@ -45,13 +46,13 @@ export async function login (req: Request, res: Response) {
   if (!req.body || !req.body.email) {
     return res.status(400).json({ error: 'Body JSON malformé' });
   }
-  const { email, password } = req.body;
-
+  const { email, password, provide } = req.body;
+  console.log(email, password, provide)
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ message: 'Email non trouvé' });
     console.log(" USER : ", user)
-    if (user.provider !== 'LOCAL') return res.status(401).json({ message : 'Mode de connexion non supporté'})
+    if (user.provider !== provide) return res.status(401).json({ message : 'Mode de connexion non supporté'})
     const match = await comparePasswords(password, user.password);
     if (!match) return res.status(401).json({ message: 'Mot de passe incorrect' });
 
@@ -63,20 +64,21 @@ export async function login (req: Request, res: Response) {
   }
 };
 
-export const googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
-export const facebookAuth = passport.authenticate('facebook', { scope: ['public_profile', 'email'] });
-export const appleAuth = passport.authenticate('Apple', { scope: ['profile', 'email'] });
+export const googleAuthLogin = passport.authenticate('google-login', { scope: ['profile', 'email'] });
+export const googleAuthRegister = passport.authenticate('google-register', { scope: ['profile', 'email'] });
+// export const facebookAuth = passport.authenticate('facebook', { scope: ['public_profile', 'email'] });
+// export const appleAuth = passport.authenticate('Apple', { scope: ['profile', 'email'] });
 
 // Handler générique pour les callbacks d'authentification sociale
-const socialAuthCallbackHandler = (strategy: 'google' | 'facebook' | 'apple') => 
+const socialAuthCallbackHandler = (strategy: 'google' | 'facebook' | 'apple' | 'local', mode: 'login' | 'register') => 
   (req: Request, res: Response, next: NextFunction) => {
-  console.log(`Requête reçue sur /${strategy}/callback`, {
+  console.log(`Requête reçue sur /${strategy}/${mode}/callback`, {
     headers: req.headers,
     body: req.body,
   });
-  passport.authenticate(strategy, {
-    successRedirect: 'http://localhost:5173/sucess',
-    failureRedirect: 'http://localhost:5173/auth/login',
+  passport.authenticate(`${strategy}-${mode}`, {
+    successRedirect: 'http://localhost:5173/accueil',
+    failureRedirect: 'http://localhost:5173/',
     failureFlash: true,
     session: false
   }, (err: any, user: { id: number; role: any; } | undefined, info: { message: string } | undefined) => {
@@ -91,13 +93,17 @@ const socialAuthCallbackHandler = (strategy: 'google' | 'facebook' | 'apple') =>
     const token = generateToken({ id: user.id, role: user.role });
     res.send(`
       <script>
-        window.opener.postMessage({ token: '${token}' }, 'http://localhost:5173');
+        window.opener.postMessage({ token: '${token}', user: ${JSON.stringify(user)}, success: true }, 'http://localhost:5173/accueil');
         window.close();
       </script>
     `);
   })(req, res, next);
 };
 
-export const googleCallback = socialAuthCallbackHandler('google');
-export const facebookCallback = socialAuthCallbackHandler('facebook');
-export const appleCallback = socialAuthCallbackHandler('apple');
+export const googleCallbackLogin = socialAuthCallbackHandler('google', 'login');
+export const googleCallbackRegister = socialAuthCallbackHandler('google', 'register');
+// export const facebookCallbackLogin = socialAuthCallbackHandler('facebook', 'login');
+// export const facebookCallbackRegister = socialAuthCallbackHandler('facebook', 'register');
+// export const appleCallbackLogin = socialAuthCallbackHandler('apple', 'login');
+// export const appleCallbackRegister = socialAuthCallbackHandler('apple', 'register');
+
