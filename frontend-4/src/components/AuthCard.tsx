@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Mail, Lock, Eye, EyeOff, ChefHat, Sparkles } from 'lucide-react';
 import type { AuthFormData, AuthError, AuthMode, SocialProvider } from '../types/auth';
+import { redirect } from 'react-router-dom';
 
 interface AuthCardProps {
   isDark: boolean;
@@ -64,14 +65,34 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     setIsLoading(true);
     setError(null);
 
-    try {
-      // Simulation d'authentification avec validation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      if (formData.email === 'test@example.com' && formData.password === 'password') {
+      try {
+      const endpoint = authMode === 'login'
+        ? 'http://localhost:5000/auth/login'
+        : 'http://localhost:5000/auth/register';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Une erreur est survenue");
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
         alert('Bienvenue dans notre cuisine ! 👨‍🍳');
+        if ( localStorage.getItem('token') === data.token && data.role == 'CLIENT')
+          redirect('/accueil');
+        else throw new Error("Your token is invalid")
+        // Rediriger ou mettre à jour le contexte utilisateur ici si besoin
       } else {
-        throw new Error("Hmm... ce plat ne figure pas au menu, essaie encore 🍽️");
+        throw new Error("Réponse inattendue du serveur");
       }
     } catch (err) {
       setError({
@@ -81,16 +102,47 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData]);
-
-  const handleSocialLogin = useCallback((provider: SocialProvider['name']) => {
+  }, [formData, authMode]);
+    const handleSocialLogin = useCallback((provider: SocialProvider['name']) => {
     console.log(`Connexion avec ${provider}`);
     // Logique de connexion sociale ici
+    const popup = window.open(
+      `http://localhost:5000/auth/${provider}`,
+      'oauthPopup',
+      'width=500,height=600'
+    );
+    console.log("popup :",popup);
+    if (!popup) return;
+    // Écoute les messages du backend (via postMessage)
+    const messageListener = (event: MessageEvent) => {
+      console.log('Message reçu :', event.data);
+      if (event.origin !== 'http://localhost:5000') return;
+      if (!event.data.sucess) {
+        setError({
+          message: event.data.message,
+          field: 'general'
+        });      
+        console.log('Erreur de connexion : ', event.data.message);
+        return;
+        }
+      const { token } = event.data;
+      if (token) {
+        localStorage.setItem('token', token);
+        console.log('Token reçu :', token);
+        popup.close();
+        window.removeEventListener('message', messageListener);
+        alert('Bienvenue dans notre cuisine ! 👨‍🍳');
+        if ( localStorage.getItem('token') === token && event.data.role == 'CLIENT')
+        redirect('/accueil');
+        else throw new Error("Your token is invalid");
+      }
+    };
+    window.addEventListener('message', messageListener);
   }, []);
 
   const handleGuestAccess = useCallback(() => {
     console.log('Accès invité');
-    // Logique d'accès invité ici
+    redirect('/accueil')
   }, []);
 
   const toggleAuthMode = useCallback(() => {
@@ -108,7 +160,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
   return (
     <div className={`relative z-10 w-full max-w-md mx-auto p-5 rounded-3xl shadow-2xl backdrop-blur-sm transition-all duration-500 ${
       isDark 
-        ? 'bg-[#9f754c]/20 border border-[#f8bb4c]/30' 
+        ? 'bg-[#000000]/50 border border-[#f8bb4c]/30' 
         : 'bg-[#fef6e5]/80 border border-[#f9d1b8]/50'
     }`}>
       <div className="text-center mb-6">
