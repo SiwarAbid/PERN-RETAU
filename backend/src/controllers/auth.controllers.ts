@@ -46,9 +46,10 @@ export async function login (req: Request, res: Response) {
   if (!req.body || !req.body.email) {
     return res.status(400).json({ error: 'Body JSON malformé' });
   }
-  const { email, password, provide } = req.body;
+  let { email, password, provide } = req.body;
   console.log(email, password, provide)
   try {
+    if (provide === undefined) provide = 'LOCAL';
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ message: 'Email non trouvé' });
     console.log(" USER : ", user)

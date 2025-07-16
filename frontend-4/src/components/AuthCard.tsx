@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff, ChefHat, Sparkles } from 'lucide-react';
 import type { AuthFormData, AuthError, AuthMode, SocialProvider } from '../types/auth';
 import { useNavigate } from 'react-router-dom';
 
+
 interface AuthCardProps {
   isDark: boolean;
 }
@@ -18,6 +19,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
   const [error, setError] = useState<AuthError | null>(null);
 
   const navigate = useNavigate();
+  
 
   const socialProviders: SocialProvider[] = [
     { 
@@ -62,49 +64,54 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
       if (error) setError(null);
     }, [error]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
       try {
-      const endpoint = authMode === 'login'
-        ? 'http://localhost:5000/auth/login'
-        : 'http://localhost:5000/auth/register';
+        const endpoint =
+          authMode === 'login'
+            ? 'http://localhost:5000/auth/login'
+            : 'http://localhost:5000/auth/register';
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        credentials: 'include'
-      });
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+          credentials: 'include'
+        });
 
-      const data = await response.json();
-      console.log(data);
+        const data = await response.json();
+        console.log(data);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Une erreur est survenue");
+        if (!response.ok) {
+          throw new Error(data.message || "Une erreur est survenue");
+        }
+
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('user', JSON.stringify(data.user));
+          alert('Bienvenue dans notre cuisine ! 👨‍🍳');
+          if (localStorage.getItem('token') === data.token && data.role == 'CLIENT')
+            navigate(`/accueil`);
+          else if (localStorage.getItem('token') === data.token && data.role == 'ADMIN')
+            navigate('/admin')
+          else throw new Error("Your token is invalid")
+          return true;
+        } else {
+          throw new Error("Réponse inattendue du serveur");
+        }
+      } catch (err) {
+        setError({
+          message: err instanceof Error ? err.message : "Une erreur est survenue",
+          field: 'general'
+        });
+        return false;
+      } finally {
+        setIsLoading(false);
       }
-
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        alert('Bienvenue dans notre cuisine ! 👨‍🍳');
-        if ( localStorage.getItem('token') === data.token && data.role == 'CLIENT')
-          navigate(`/accueil`);
-        else throw new Error("Your token is invalid")
-        // Rediriger ou mettre à jour le contexte utilisateur ici si besoin
-      } else {
-        throw new Error("Réponse inattendue du serveur");
-      }
-    } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : "Une erreur est survenue",
-        field: 'general'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [authMode, formData, navigate]);
+    };
     const handleSocialLogin = useCallback(async (provider: SocialProvider['name']) => {
     console.log(`Connexion avec ${provider}`);
     console.log(JSON.stringify({formData, provider}))

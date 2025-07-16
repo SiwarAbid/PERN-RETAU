@@ -23,7 +23,7 @@ router.post('/register', (req, res, next) => {
   register(req, res).catch(next);
 });
 router.post('/login', (req, res, next) => {
-  console.log("ROUTER LOGIN : REQ", req)
+  // console.log("ROUTER LOGIN : REQ", req)
   login(req, res).catch(next);
 });
 

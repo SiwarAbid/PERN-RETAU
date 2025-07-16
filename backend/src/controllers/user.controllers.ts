@@ -2,36 +2,65 @@ import { Request, Response } from 'express';
 import { prisma } from '../prisma';
 import { hashPassword } from '../utils/hash';
 import { sendEmail } from './contact.controllers';
+import { Role } from '@prisma/client'; // Ajout de l'import de l'enum
 
 // Créer un nouvel utilisateur
 export const createUser = async (req: Request, res: Response) => {
   try {
-    let { name, email, password, role } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email requis' });
+    console.log("hello here  backend CREATE USER  ---")
+    console.log("Here my body -- ", req.body);
     
+    // On récupère tout le body, mais on extrait les champs principaux
+    let { name, email, password, role, ...otherFields } = req.body;
+    let ipassword;
+    
+    if (!email) return res.status(400).json({ error: 'Email requis' });
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return res.status(400).json({ error: 'Email déjà utilisé' });
 
     if (!name) name = email.split('@')[0].replace(/\d+/g, '');
-    if (!password) password = require('crypto').randomBytes(8).toString('hex');
-    else password = await hashPassword(password)
+    if (!password) {
+      password = require('crypto').randomBytes(8).toString('hex');
+      ipassword = password;
+    }
+    else {
+      ipassword = password;
+      password = await hashPassword(password);
+      
+    }
 
     if (!role) role = 'CLIENT';
+    if (otherFields.isActived === 'true') otherFields.isActived = true;
+    else if (otherFields.isActived === 'false') otherFields.isActived = false;
 
+
+    // On construit dynamiquement les données à insérer
+    const userData: any = {
+      name,
+      email,
+      password,
+      role,
+      ...otherFields // Ajoute tous les autres champs du body (ex: phone, address, etc.)
+    };
+    console.log("userData --- ", userData)
     const user = await prisma.user.create({
-      data: { name, email, password, role }
+      data: userData
     });
+    console.log("User Added && mail en cours d'envoi ---")
     let subject = 'Bienvenue sur SweetCorner!';
     let text = `Bonjour ${name}, 
     Bienvenue sur notre plateforme.
-    Nous sommes heureux de vous informer que vous avez été inscrit avec succée dans notre Platforme SWEET CORNER
+    Nous sommes heureux de vous informer que vous avez été inscrit avec succès dans notre Plateforme SWEET CORNER
     Vos informations de connexion sont : 
     
     Email : ${email}
-    Mot de passe : ${password}
+    Mot de passe : ${ipassword}
     
     Merci pour votre confiance.`
     sendEmail({to: email, subject: subject, text: text});
+    console.log("User Added && mail envoyé ---")
+
     res.status(201).json(user);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -39,13 +68,34 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 // Récupérer tous les utilisateurs
-export const getUsers = async (_req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response) => {
+  console.log('Full URL:', req.url);
+  console.log('Query params:', req.query);
+
   try {
-    const users = await prisma.user.findMany();
-    res.json(users);
+    const role = req.query.role as string | undefined;
+    console.log('Role:', role);
+    let users;
+    if (role) {
+      // Vérification stricte de l'enum
+      if (!Object.values(Role).includes(role as Role)) {
+        return res.status(400).json({ error: 'Role invalide' });
+      }
+      console.log('Role:', role);
+      users = await prisma.user.findMany({ where: { role: role as Role } });
+      console.log('Users:', users);
+      if (!users || users.length === 0) {
+        return res.status(404).json({ error: 'Aucun utilisateur trouvé pour ce rôle' });
+      }
+    } else {
+      console.log('Without role !! ')
+      users = await prisma.user.findMany();
+    }
+    res.json({ clients: users });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+
 };
 
 // Récupérer un utilisateur par ID
@@ -62,17 +112,28 @@ export const getUserById = async (req: Request, res: Response) => {
 // Mettre à jour un utilisateur
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { password, ...rest } = req.body;
-    let data = { ...rest };
+    console.log("hello here  backend uPDATE USER  ---")
+    console.log("Here my body -- ", req.body);
 
+    // On extrait le mot de passe pour le traiter à part, tout le reste est dynamique
+    const { password, ...otherFields } = req.body;
+    
+    if (otherFields.isActived === 'true') otherFields.isActived = true;
+    else if (otherFields.isActived === 'false') otherFields.isActived = false;
+
+    let data = { ...otherFields };
+
+    // Si un mot de passe est fourni, on le hash avant de l'enregistrer
     if (password) {
       data.password = await hashPassword(password);
     }
 
+    // Mise à jour dynamique de tous les champs reçus dans le body
     const user = await prisma.user.update({
       where: { id: Number(req.params.id) },
       data
     });
+
     res.json(user);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -82,6 +143,7 @@ export const updateUser = async (req: Request, res: Response) => {
 // Supprimer un utilisateur
 export const deleteUser = async (req: Request, res: Response) => {
   try {
+    console.log("hello here  backend DELETE USER  ---")
     await prisma.user.delete({ where: { id: Number(req.params.id) } });
     res.json({ message: 'Utilisateur supprimé' });
   } catch (err: any) {

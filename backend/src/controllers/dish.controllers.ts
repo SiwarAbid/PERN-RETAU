@@ -1,20 +1,52 @@
 import { Request, Response } from 'express';
 import { prisma } from '../prisma';
-
+import { upload } from '../middlewares/upload';
 // Créer un nouveau plat
 export const createDish = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, categoryId } = req.body;
-    if (!name || !price || !categoryId) {
-      return res.status(400).json({ error: 'Nom, prix et catégorie requis' });
+    console.log("req.body :",req.body);
+    const { name, category, ...otherFields } = req.body;
+    
+    if (!name) {
+      console.log("Nom requis");
+      return res.status(400).json({ error: 'Nom requis' });
     }
 
-    const existingDish = await prisma.dish.findFirst({ where: { name } });
+    const existingDish = await prisma.dish.findFirst({ where: { name }, include: { category: true } });
     if (existingDish) return res.status(400).json({ error: 'Nom déjà utilisé' });
 
+    if (otherFields.isAvailable === 'true') otherFields.isAvailable = true;
+    else if (otherFields.isAvailable === 'false') otherFields.isAvailable = false;
+    else otherFields.isAvailable = true;
+
+
+    // Gestion de l'image via Multer
+    if (!req.file) return res.status(400).json({ error: 'Image requise' });
+    const imagePath = req.file.filename;
+    otherFields.image = imagePath;
+
+    if (otherFields.price) 
+      otherFields.price = Number(otherFields.price);
+    else return res.status(400).json({ error: 'Prix requis' });
+
+    console.log("name :",name);
+    console.log("otherFields :",otherFields, "cateeg", category);
     const dish = await prisma.dish.create({
-      data: { name, description, price: Number(price), categoryId: Number(categoryId) }
+      data: {
+        name, 
+        price: Number(otherFields.price), 
+        category: {
+          connectOrCreate: {
+            where: { name: category }, // ⚠️ ce champ doit être unique dans le modèle Category
+            create: { name: category }
+          }
+        },
+        ...otherFields}, 
+      include: {
+        category: true
+      }
     });
+    console.log("dish created :",dish);
     res.status(201).json(dish);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -24,8 +56,12 @@ export const createDish = async (req: Request, res: Response) => {
 // Récupérer tous les plats
 export const getDishes = async (_req: Request, res: Response) => {
   try {
-    const dishes = await prisma.dish.findMany();
-    res.json(dishes);
+    const dishes = await prisma.dish.findMany({
+    include: {
+    category: true
+  }});
+  console.log("Dishes :",dishes);
+  res.json(dishes);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -71,3 +107,24 @@ export const deleteDish = async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+type DishWithCategoryName = {
+  id: number;
+  idCategory: number;
+};
+
+export async function linkDishesToCategories(dishes: DishWithCategoryName[]) {
+  for (const dish of dishes) {
+    await prisma.dish.update({
+      where: { id: dish.id },
+      data: {
+        category: {
+          connect: {
+             id: dish.idCategory
+          }
+        }
+      }
+    });
+    console.log(`✅ Dish ${dish.id} linked to category "${dish.idCategory}"`);
+  }
+}

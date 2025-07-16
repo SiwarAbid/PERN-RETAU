@@ -101,7 +101,7 @@ export const sendEmail = async ({
       text,
       html,
     });
-
+    console.log('info ; ', info);
     console.log('📧 Email envoyé:', info.messageId);
     return info;
   } catch (error: any) {

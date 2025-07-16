@@ -14,6 +14,7 @@ import { reviewRouter } from './routes/review.routes';
 import { restauRouter } from './routes/restau.routes';
 import { contactRouter } from './routes/contact.routes';
 import flash from 'connect-flash';
+import path from 'path';
 
 const app = express();
 app.use(require('cors')({
@@ -32,12 +33,9 @@ app.listen(PORT, () => {
 });
 
 
-app.get('/users', async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
 app.use(flash());
 app.use(passport.initialize());
+app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 
 app.use('/auth', authRouter);
 
