@@ -60,7 +60,15 @@ const EmployeeList: React.FC = () => {
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.role.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesDepartment = departmentFilter === '' || employee.role === departmentFilter;
+      let matchesDepartment = true;
+
+      if (departmentFilter) {
+        if (departmentFilter === 'CHEF') {
+          matchesDepartment = employee.role === 'CHEF' || employee.role === 'SOUS_CHEF';
+        } else {
+          matchesDepartment = employee.role === departmentFilter;
+        }
+      }
 
     if (statusFilter === 'masqué') {
       // Affiche uniquement les employee masqués
@@ -90,20 +98,22 @@ const EmployeeList: React.FC = () => {
 
   const getDepartmentColor = (department: string) => {
     switch (department) {
-      case 'kitchen': return '#FF8C42';
-      case 'service': return '#FFB84D';
-      case 'management': return '#A67C5A';
-      case 'cleaning': return '#F4C2A1';
+      case 'CHEF': return '#FF8C42';
+      case 'SOUS_CHEF': return '#FF8C42';
+      case 'SERVER': return '#FFB84D';
+      case 'ADMIN': return '#A67C5A';
+      case 'AGENT': return '#F4C2A1';
       default: return '#6B7280';
     }
   };
 
   const getDepartmentLabel = (department: string) => {
     switch (department) {
-      case 'kitchen': return 'Cuisine';
-      case 'service': return 'Service';
-      case 'management': return 'Direction';
-      case 'cleaning': return 'Entretien';
+      case 'CHEF': return 'Cuisine';
+      case 'SOUS_CHEF': return 'Cuisine';
+      case 'SERVER': return 'Service';
+      case 'ADMIN': return 'Direction';
+      case 'AGENT': return 'Polyvalent';
       default: return department;
     }
   };
@@ -130,7 +140,7 @@ const EmployeeList: React.FC = () => {
       required: true,
       options: [
         { value: 'CHEF', label: 'Chef de Cuisine' },
-        { value: 'SOUS CHEF', label: 'Sous chef de Cuisine' },
+        { value: 'SOUS_CHEF', label: 'Sous chef de Cuisine' },
         { value: 'SERVER', label: 'Server' },
         { value: 'ADMIN', label: 'Manager' },
         { value: 'AGENT', label: 'Agent polyvalent ' }
@@ -282,12 +292,14 @@ const EmployeeList: React.FC = () => {
           </div>
           <select
             value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+            onChange={(e) => setDepartmentFilter(e.target.value)} 
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
             <option value="">Tous les départements</option>
-            <option value="kitchen">Cuisine</option>
-            <option value="service">Service</option>
-            <option value="management">Direction</option>
-            <option value="cleaning">Polyvalant</option>
+            <option value='CHEF'>Cuisine</option>
+            <option value="SERVER">Service</option>
+            <option value="ADMIN">Direction</option>
+            <option value="AGENT">Polyvalant</option>
           </select> 
           <select 
           value={statusFilter}

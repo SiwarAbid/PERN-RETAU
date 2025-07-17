@@ -34,6 +34,9 @@ export const createUser = async (req: Request, res: Response) => {
     if (otherFields.isActived === 'true') otherFields.isActived = true;
     else if (otherFields.isActived === 'false') otherFields.isActived = false;
 
+    if(otherFields.phone) otherFields.phone = otherFields.phone.replace(/\D/g, '');
+    if(otherFields.salary) otherFields.salary = Number(otherFields.salary);
+    if(otherFields.dateEmbauche) otherFields.dateEmbauche = new Date(otherFields.dateEmbauche);
 
     // On construit dynamiquement les données à insérer
     const userData: any = {
@@ -41,7 +44,7 @@ export const createUser = async (req: Request, res: Response) => {
       email,
       password,
       role,
-      ...otherFields // Ajoute tous les autres champs du body (ex: phone, address, etc.)
+      ...otherFields 
     };
     console.log("userData --- ", userData)
     const user = await prisma.user.create({
@@ -92,13 +95,16 @@ export const getUsers = async (req: Request, res: Response) => {
         }
       // Employees
         else if (role === 'EMPLOYEE') {
+          
           let employees = await prisma.user.findMany({
              where: {
               NOT: {
-                role: 'CLIENT'
+                role: 'CLIENT' as Role
               }
             } 
           });
+          let users = await prisma.user.findMany();
+          console.log('Users:', users);
           console.log('Employees:', employees);
           if (!employees || employees.length === 0) 
             return res.status(404).json({ error: 'Aucun employé trouvé' });
@@ -143,6 +149,10 @@ export const updateUser = async (req: Request, res: Response) => {
     if (otherFields.isActived === 'true') otherFields.isActived = true;
     else if (otherFields.isActived === 'false') otherFields.isActived = false;
 
+    if(otherFields.phone) otherFields.phone = otherFields.phone.replace(/\D/g, '');
+    if(otherFields.salary) otherFields.salary = Number(otherFields.salary);
+    if(otherFields.dateEmbauche) otherFields.dateEmbauche = new Date(otherFields.dateEmbauche);
+    if(otherFields.role) otherFields.role = otherFields.role.toUpperCase()
     let data = { ...otherFields };
 
     // Si un mot de passe est fourni, on le hash avant de l'enregistrer
@@ -153,7 +163,10 @@ export const updateUser = async (req: Request, res: Response) => {
     // Mise à jour dynamique de tous les champs reçus dans le body
     const user = await prisma.user.update({
       where: { id: Number(req.params.id) },
-      data
+      data :{
+        role: data.role as Role,
+        ...data
+      }
     });
 
     res.json(user);
