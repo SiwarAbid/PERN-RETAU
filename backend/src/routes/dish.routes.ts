@@ -21,7 +21,7 @@ router.get('/dish/:id', (req, res, next) => {
     getDishById(req, res).catch(next);
 });
 
-router.put('/update-dish/:id', updateDish);
+router.put('/update-dish/:id', upload.single('image'), updateDish);
 router.delete('/delete-dish/:id', deleteDish);
 
 // router.put('/link-dishes-to-categories', async (req, res) => {

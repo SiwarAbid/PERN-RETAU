@@ -81,16 +81,38 @@ export const getDishById = async (req: Request, res: Response) => {
 // Mettre à jour un plat
 export const updateDish = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, categoryId } = req.body;
-    const data: any = {};
-    if (name) data.name = name;
-    if (description) data.description = description;
-    if (price) data.price = Number(price);
-    if (categoryId) data.categoryId = Number(categoryId);
+    console.log("Hello here updateDIsh from backend -- ");
+    console.log("req.body :",req.body);
+    console.log("req.params :",req.params);
+    console.log("req.file :",req.file);
 
+    const { ...otherFields } = req.body;
+
+    if (otherFields.isAvailable === 'true') otherFields.isAvailable = true;
+    else if (otherFields.isAvailable === 'false') otherFields.isAvailable = false;
+    else otherFields.isAvailable = true;
+
+    if (req.file) {
+      const imagePath = req.file.filename;
+      otherFields.image = imagePath;
+    };
+
+    console.log("data :",otherFields);
     const dish = await prisma.dish.update({
       where: { id: Number(req.params.id) },
-      data
+      data: {
+        ...otherFields,
+        price : Number(otherFields.price), 
+        category: {
+          connectOrCreate: {
+            where: { name: otherFields.category },
+            create: { name: otherFields.category }
+          }
+        }
+      },
+      include: {
+        category: true
+      }
     });
     res.json(dish);
   } catch (err: any) {

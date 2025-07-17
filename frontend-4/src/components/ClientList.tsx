@@ -232,9 +232,11 @@ const ClientList: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
-          <select   value={statusFilter}
-  onChange={(e) => setStatusFilter(e.target.value)}
-className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+          <select   
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
             <option value="">Tous</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>

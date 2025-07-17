@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Plus, Eye, Edit, Trash2, DollarSign, Clock, EyeClosed } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Clock } from 'lucide-react';
 import type { Dish } from '../types/user';
 import DataLoadingState from './Loading';
 import CrudModal from './CRUDModal';
 import DeleteModal from './DeleteModal';
-
+import type { Category } from '../types/user';
 const DishList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-    const [selectedDishes, setSelectedDishes] = useState<number[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -15,10 +14,11 @@ const DishList: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
-    const [hiddenDishes, setHiddenDishes] = useState<number[]>([]); // IDs masqués
     const [categorieFilter, setCategorieFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
+    const [categories, setCategories] = useState<Category[]>([]);
   
+
     useEffect(() => {
       const fetchdishes = async () => {
         setLoading(true);
@@ -43,55 +43,47 @@ const DishList: React.FC = () => {
         }
       };
       fetchdishes();
+      const getCategory = async () => {
+      
+      try {
+        const response = await fetch('http://localhost:5000/categories', {
+          credentials: 'include',
+        });
+        console.log(response)
+        if (!response.ok) throw new Error('Erreur lors de la récupération des catégories');
+
+        const data = await response.json();
+        setCategories(data);
+      
+      } catch {
+        throw new Error('Erreur lors de la récupération des catégories');
+      }
+      };
+      getCategory();
+  
     },[]);
+  console.log(categories)
   
-    // Fonction pour masquer/démasquer un Dishes
-    const handleHideDishes = (DishesId: number) => {
-      setHiddenDishes((prev) =>
-        prev.includes(DishesId)
-          ? prev.filter((id) => id !== DishesId) // Démasquer si déjà masqué
-          : [...prev, DishesId] // Masquer sinon
-      );
-    };
-  
-    const filteredDishes = dishes.filter(dishes => {
-      if (statusFilter === 'masqué') {
-        // Affiche uniquement les dishes masqués
-        return hiddenDishes.includes(dishes.id) &&
-          (dishes.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      }
+    const filteredDishes = dishes.filter(dish => {
+      const matchesSearch = 
+        dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dish.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dish.category.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory = categorieFilter === '' || dish.category.name === categorieFilter;
+
       if (statusFilter === 'unavailable') {
-        // Affiche uniquement les dishes actifs non masqués
-        return !dishes.isAvailable &&
-          !hiddenDishes.includes(dishes.id) &&
-          (dishes.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.description.toLowerCase().includes(searchTerm.toLowerCase()));
+        return !dish.isAvailable && matchesSearch && matchesCategory;
       }
+
       if (statusFilter === 'available') {
-        // Affiche uniquement les dishes inactifs non masqués
-        return dishes.isAvailable &&
-          !hiddenDishes.includes(dishes.id) &&
-          (dishes.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           dishes.description.toLowerCase().includes(searchTerm.toLowerCase()));
+        return dish.isAvailable && matchesSearch && matchesCategory;
       }
-      // Par défaut (tous sauf masqués)
-      return !hiddenDishes.includes(dishes.id) &&
-        (dishes.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         dishes.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         dishes.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      // Si aucun filtre d'état (tous les plats)
+      return matchesSearch && matchesCategory;
     });
   
-    const handleSelectDishes = (dishId: number) => {
-      setSelectedDishes(prev =>
-        prev.includes(dishId)
-          ? prev.filter(id => id !== dishId)
-          : [...prev, dishId]
-      );
-    };
   
     // A corriger ---
       const dishesFields = [
@@ -103,12 +95,10 @@ const DishList: React.FC = () => {
       label: 'Catégorie', 
       type: 'select' as const, 
       required: true,
-      options: [
-        { value: 'Entrées', label: 'Entrées' },
-        { value: 'Plats principaux', label: 'Plats principaux' },
-        { value: 'Dessert', label: 'Dessert' },
-        { value: 'Spécialités', label: 'Spécialités' }
-      ]
+      options: categories.map((category) => ({
+        value: category.name,
+        label: category.name,
+      })),
     },
     { name: 'image', label: 'URL de l\'image', type: 'file' as const },
     { 
@@ -163,18 +153,24 @@ const DishList: React.FC = () => {
       setError(null);
       try {
         console.log('Hello here frontned Edit Plat !! --- ')
+        console.log('Data front ;', data)
+        const formData = new FormData();
+        formData.append('name', data.name as string);
+        formData.append('category', data.category as string);
+        formData.append('description', data.description as string);
+        formData.append('price', data.price as string);
+        formData.append('isAvailable', data.isAvailable as string); // "true" ou "false"
+        formData.append('image', data.image as File); // ici file est un objet File (e.target.files[0])
         const response = await fetch(`http://localhost:5000/update-dish/${selectedDish.id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(data),
+          body: formData,
         });
+        console.log('RESPONSE EDITT -- ', response)
         if (!response.ok) {
           throw new Error('Erreur lors de la modification du plat');
         }
         const updatedDishes = await response.json();
+        console.log('Updated Dishes: ', updatedDishes)
         setDishes(prev =>
           prev.map(dishes =>
             dishes.id === selectedDish.id ? { ...dishes, ...updatedDishes } : dishes
@@ -225,12 +221,16 @@ const DishList: React.FC = () => {
       setShowDeleteModal(true);
     };
 
+    
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'Entrées': return '#FF8C42';
-      case 'Plats principaux': return '#FFB84D';
-      case 'Desserts': return '#F4C2A1';
-      case 'Spécialités': return '#A67C5A';
+      case 'Salade': return '#FF8C42';
+      case 'Plats': return '#FFB84D';
+      case 'Dessert': return '#c3b1c2';
+      case 'Boissons': return '#A67C5A';
+      case 'Soupe' : return '#f05c5c';
+      case 'Sandiwch' : return '#70be33';
+      case 'Pizza' : return '#f5d380';
       default: return '#6B7280';
     }
   };
@@ -271,10 +271,11 @@ const DishList: React.FC = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
             <option value="">Toutes les catégories</option>
-            <option value="Entrées">Entrées</option>
-            <option value="Plats principaux">Plats principaux</option>
-            <option value="Desserts">Desserts</option>
-            <option value="Spécialités">Spécialités</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
           </select>
           <select 
               value={statusFilter}
@@ -321,9 +322,8 @@ const DishList: React.FC = () => {
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-semibold text-gray-900">{dish.name}</h3>
                   <div className="flex items-center gap-1">
-                    <DollarSign size={16} className="text-gray-400" />
                     <span className="text-lg font-bold" style={{ color: '#FF8C42' }}>
-                      {dish.price.toFixed(2)}€
+                      {dish.price.toFixed(2)} TND
                     </span>
                   </div>
                 </div>
@@ -332,23 +332,11 @@ const DishList: React.FC = () => {
                 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedDishes.includes(dish.id)}
-                      onChange={() => handleSelectDishes(dish.id)}
-                      className="rounded border-gray-300 focus:ring-orange-500" />
                     <span className={`text-xs font-medium ${dish.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
                       {dish.isAvailable ? 'Disponible' : 'Indisponible'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleHideDishes(dish.id)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      title={hiddenDishes.includes(dish.id) ? "Démasquer" : "Masquer"}
-                    >
-                      {hiddenDishes.includes(dish.id) ? <EyeClosed /> : <Eye size={16} />}
-                    </button>
                     <button onClick={() => openEditModal(dish)} className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
                       <Edit size={16} />
                     </button>
@@ -400,10 +388,11 @@ const DishList: React.FC = () => {
           selectedDish
             ? {
                 name: selectedDish.name ?? null,
-                email: selectedDish ?? null,
-                phone: selectedDish ?? null,
-                address: selectedDish ?? null,
-                status: selectedDish ? 'active' : 'inactive',
+                description: selectedDish.description ?? null,
+                price: selectedDish.price ?? null,
+                image: selectedDish.image ?? null,
+                isAvailable: selectedDish.isAvailable ?? null,
+                category: selectedDish.category.name ?? null,
               }
             : undefined
         }

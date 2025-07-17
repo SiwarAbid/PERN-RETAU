@@ -14,6 +14,8 @@ export interface User {
   updatedAt?: string | null;
   lastVisit?: string | null;
   isActived?: boolean;
+  salary?: number | null;
+  dateEmbauche?: string | null;
 }
 
 export interface Employee {
@@ -44,7 +46,6 @@ export interface Category {
   id: number;
   name: string;
   description: string;
-  dishes: Dish[];
 }
 
 export interface Review {

@@ -75,23 +75,45 @@ export const getUsers = async (req: Request, res: Response) => {
   try {
     const role = req.query.role as string | undefined;
     console.log('Role:', role);
-    let users;
     if (role) {
       // Vérification stricte de l'enum
       if (!Object.values(Role).includes(role as Role)) {
+        console.log('Invalid role:', role);
         return res.status(400).json({ error: 'Role invalide' });
       }
       console.log('Role:', role);
-      users = await prisma.user.findMany({ where: { role: role as Role } });
-      console.log('Users:', users);
-      if (!users || users.length === 0) {
-        return res.status(404).json({ error: 'Aucun utilisateur trouvé pour ce rôle' });
+      // Clients
+        if (role === 'CLIENT') {
+          let clients = await prisma.user.findMany({ where: { role: role as Role } });
+          console.log('Clients:', clients);
+          if (!clients || clients.length === 0) 
+            return res.status(404).json({ error: 'Aucun utilisateur trouvé pour ce rôle' });
+          res.json({ clients: clients });
+        }
+      // Employees
+        else if (role === 'EMPLOYEE') {
+          let employees = await prisma.user.findMany({
+             where: {
+              NOT: {
+                role: 'CLIENT'
+              }
+            } 
+          });
+          console.log('Employees:', employees);
+          if (!employees || employees.length === 0) 
+            return res.status(404).json({ error: 'Aucun employé trouvé' });
+          res.json({ employees: employees });
+        }
+        // Without Role ( All users)
+        else {
+          let users = await prisma.user.findMany();
+          console.log('Users:', users);
+          if (!users || users.length === 0) 
+            return res.status(404).json({ error: 'Aucun utilisateur trouvé' });
+          res.json({ users: users });
+        }
       }
-    } else {
-      console.log('Without role !! ')
-      users = await prisma.user.findMany();
-    }
-    res.json({ clients: users });
+
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
