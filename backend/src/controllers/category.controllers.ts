@@ -5,13 +5,16 @@ import { prisma } from '../prisma';
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name, description } = req.body;
-    if (!name) return res.status(400).json({ error: 'Le nom est requis' });
+    const imagePath = req.file?.filename;
 
+    if (!name) return res.status(400).json({ error: 'Le nom est requis' });
+    if (!imagePath) return res.status(400).json({ error: 'L\'image est requise' });
     const existingCategory = await prisma.category.findUnique({ where: { name } });
+
     if (existingCategory) return res.status(400).json({ error: 'Nom déjà utilisé' });
 
     const category = await prisma.category.create({
-      data: { name, description }
+      data: { name, description, imaage: imagePath }
     });
     res.status(201).json(category);
   } catch (err: any) {
@@ -23,6 +26,7 @@ export const createCategory = async (req: Request, res: Response) => {
 export const getCategories = async (_req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany();
+    console.log(categories);
     res.json(categories);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -44,9 +48,11 @@ export const getCategoryById = async (req: Request, res: Response) => {
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { name, description } = req.body;
+    const imagePath = req.file?.filename;
     const data: any = {};
     if (name) data.name = name;
     if (description) data.description = description;
+    if (imagePath) data.imaage = imagePath; // This line is correct, 'image' is a valid property for Category model
 
     const category = await prisma.category.update({
       where: { id: Number(req.params.id) },

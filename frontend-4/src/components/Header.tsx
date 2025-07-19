@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, X, User, Sun, Moon, ChefHat, LogOut } from 'lucide-react';
+import { Menu, X, User, Sun, Moon, ChefHat, LogOut, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 
@@ -67,6 +67,10 @@ const Header = () => {
             }
             </button>
 
+            {/* Cart button */}
+            <button className='profile-btn'>
+              <ShoppingCart className='icon icon-white' />
+            </button>
             {/* Logout button */}
             <button 
               className="logout-btn"

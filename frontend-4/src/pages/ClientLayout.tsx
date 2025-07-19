@@ -7,10 +7,10 @@ import TopDishes from '../components/TopDish';
 import ChefsSection from '../components/NosChefs';
 import AboutSection from '../components/AboutUs';
 import ContactSection from '../components/Contact';
-function Accueil() {
+import { Outlet } from 'react-router-dom';
+
+export const AccueilSections: React.FC = () => {
   return (
-    <div className="transition-colors">
-      <Header />
       <main>
         <Hero />
         <MenuSection />
@@ -18,6 +18,14 @@ function Accueil() {
         <ChefsSection />
         <AboutSection />
         <ContactSection />
+      </main>
+  )} 
+export const Accueil: React.FC = () => {
+  return (
+    <div className="transition-colors">
+      <Header />
+      <main className="flex-grow">
+        <Outlet /> 
       </main>
       <Footer />
     </div>

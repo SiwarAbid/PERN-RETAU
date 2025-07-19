@@ -5,24 +5,28 @@ import type { Dish } from '../pages/Menu';
 interface PopularDishesProps {
   dishes: Dish[];
   onAddToCart: (dish: Dish) => void;
+  selectedCategory: string;
 }
 
-const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart }) => {
+const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart, selectedCategory }) => {
   const getCategoryTitle = (category: string) => {
+    console.log("getCategoryTitle: ", category)
     const titles = {
-      salad: 'Fresh Salads',
-      soup: 'Warm Soups',
-      pizza: 'Delicious Pizzas',
-      meat: 'Grilled Meats',
-      drinks: 'Refreshing Drinks'
+      Plats: 'Plats traditionnels',
+      Salade: 'Salades fraîches',
+      Boissons: 'Boissons rafraîchissantes',
+      Soupe: 'Soupes chaudes',
+      Dessert: 'Douceurs & Desserts',
+      Sandwich: 'Sandwichs savoureux',
+      Pizza: 'Pizzas délicieuses'
     };
-    return titles[category as keyof typeof titles] || 'Popular Dishes';
+    return titles[category as keyof typeof titles] || 'Nos plats';
   };
 
   return (
     <div>
       <h3 className="text-xl font-bold text-gray-800 mb-6">
-        {dishes.length > 0 ? getCategoryTitle(dishes[0].category) : 'Menu'}
+        {dishes.length > 0 && selectedCategory !== '' ? getCategoryTitle(dishes[0].category.name) : 'Menu'}
       </h3>
       
       {dishes.length === 0 ? (
@@ -43,7 +47,7 @@ const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart }) =>
           >
             <div className="w-full h-32 rounded-xl overflow-hidden mb-4">
               <img
-                src={dish.image}
+                src={`http://localhost:5000/uploads/${dish.image}`}
                 alt={dish.name}
                 className="w-full h-full object-cover"
               />
@@ -56,7 +60,7 @@ const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart }) =>
             
             <div className="flex items-center justify-between">
               <span className="text-lg font-bold text-gray-800">
-                ${dish.price.toFixed(2)}
+                {dish.price.toFixed(2)} TND
               </span>
               <button
                 onClick={() => onAddToCart(dish)}
