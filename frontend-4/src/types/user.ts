@@ -5,17 +5,19 @@ export interface User {
   name: string;
   email: string;
   password: string;
-  image?: string | null;
-  phone?: string | null;
-  address?: string | null;
+  image?: string;
+  phone?: string;
+  address?: string;
   provider: string;
   role: Role;
   createdAt?: string; // ISO string, Date possible côté backend
-  updatedAt?: string | null;
-  lastVisit?: string | null;
+  updatedAt?: string;
+  lastVisit?: string;
   isActived?: boolean;
-  salary?: number | null;
-  dateEmbauche?: string | null;
+  salary?: number;
+  dateEmbauche?: string;
+  isFeaturedChef?: boolean;
+  description?: string 
 }
 
 export interface Employee {

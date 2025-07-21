@@ -5,7 +5,7 @@ import { prisma } from '../prisma';
 export const createRestau = async (req: Request, res: Response) => {
   try {
     const { name, address, description, aboutUs, phone, email, image, logo } = req.body;
-    if (!name || !address || !aboutUs || !phone || !email || !image || !logo) {
+    if (!name || !address || !aboutUs || !phone || !email) {
       return res.status(400).json({ error: 'Tous les champs requis ne sont pas fournis' });
     }
 
@@ -44,8 +44,8 @@ export const getLastRestau = async (req: Request, res: Response) => {
 // Mettre à jour un restaurant
 export const updateRestau = async (req: Request, res: Response) => {
   try {
-    const { name, address, description } = req.body;
-    const data: any = {};
+    const { name, address, description, ...otherData } = req.body;
+    const data: any = {...otherData};
     if (name) data.name = name;
     if (address) data.address = address;
     if (description) data.description = description;

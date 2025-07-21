@@ -1,29 +1,9 @@
 import { useEffect, useState } from 'react';
-import Header from '../components/Header';
-import CategorySection from '../components/CategorySection';
-import PopularDishes from '../components/DishMenu';
-import Cart from '../components/Cart';
-import DataLoadingState from '../components/Loading';
-import type { Category } from '../types/user';
-
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  category: Category;
-}
-
-export interface Dish {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: Category;
-  isSpecial?: boolean;
-}
+import CategorySection from '../components/client-view/Menu/CategorySection';
+import PopularDishes from '../components/client-view/Menu/DishMenu';
+import Cart from '../components/client-view/Menu/Cart';
+import type { Dish } from '../types/dish';
+import { useCart } from '../hooks/useCart';
 
     // // Salades
     // { id: '1', name: 'Fresh and Healthy Salad', description: 'Cucumber • Tomatoes • Lettuce', price: 2.85, image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1', category: 'salad' },
@@ -51,65 +31,18 @@ export interface Dish {
     // { id: '15', name: 'Smoothie Bowl', description: 'Mixed fruits • Yogurt • Granola', price: 4.25, image: 'https://images.pexels.com/photos/544961/pexels-photo-544961.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1', category: 'drinks' }
 const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [allDishes, seAllDishes] = useState<Dish[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const allDishes : Dish[] = localStorage.getItem('dishes') ? JSON.parse(localStorage.getItem('dishes') as string) : [];
+
+
   useEffect (() =>{
-    const fetchDishes = async () => {
-    setLoading(true);
-    setError(null);
-      try {
-        const response = await fetch('http://localhost:5000/dishes', {
-          credentials: 'include',
-        });
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des plats');
-        }
-        const data = await response.json();
-        console.log(data);
-        seAllDishes(data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Erreur inconnue lors du chargement'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDishes();
-  },[])
+
+
+  },[]);
+
   const filteredDishes = allDishes.filter(dish => selectedCategory === '' || dish.category.name === selectedCategory);
   console.log("Selected Category: ", selectedCategory)
-  const addToCart = (dish: Dish) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(cartItem => cartItem.id === dish.id);
-      if (existingItem) {
-        return prev.map(cartItem =>
-          cartItem.id === dish.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
-      }
-      return [...prev, { ...dish, quantity: 1, category: dish.category }];
-    });
-  };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity === 0) {
-      setCartItems(prev => prev.filter(item => item.id !== id));
-    } else {
-      setCartItems(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, quantity } : item
-        )
-      );
-    }
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const  { cartItems, addToCart, updateQuantity, clearCart } = useCart();
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
@@ -117,50 +50,42 @@ const App: React.FC = () => {
       return;
     }
     
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = cartItems.reduce((sum: number, item: { price: number; quantity: number; }) => sum + (item.price * item.quantity), 0);
     const discount = total * 0.1;
     const final = total - discount;
     
     alert(`Commande confirmée !\nTotal: ${final.toFixed(2)} TND\nMerci pour votre commande !`);
     clearCart();
   };
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F5DC' }}>
-      <div className=" ">
-        <Header />
+    <div className="min-h-screen pb-20" style={{ backgroundColor: '#F5F5DC' }}>
+      
         <div className="flex pt-20 max-w-7xl gap-6 mt-6 mx-auto px-4">
 
-          {/* Gestion du chargement et des erreurs */}
-          {loading && <div className="text-center py-4"><DataLoadingState isLoading={loading} isEmpty={true} hasError={false}/></div>}
-          {error && <div className="text-center py-4 text-red-500"><DataLoadingState isLoading={loading} isEmpty={false} hasError={true} errorMessage={error}/></div>}
-          
           {/* Category Section */}
-          {!loading && !error && 
           <div className="flex-1"> 
             <CategorySection 
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
               totalFood={allDishes.length}
             />
+
             <PopularDishes 
               dishes={filteredDishes}
               onAddToCart={addToCart} 
               selectedCategory={selectedCategory}
             />
           </div>
-          }
-          {!loading && !error && 
+
           <div className="w-80">
             <Cart 
-              items={cartItems} 
               onUpdateQuantity={updateQuantity}
               onCheckout={handleCheckout}
               onClearCart={clearCart}
             />
           </div>
-          }
         </div>
-      </div>
     </div>
   );
 }

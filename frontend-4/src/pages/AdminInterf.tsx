@@ -3,14 +3,14 @@ import { AuthProvider } from '../context/AuthContext';
 import LoginPage from '../pages/LoginAdmin';
 import Sidebar from '../components/SideBar';
 // import Dashboard from '../components/Dashboard/Dashboard';
-import ClientList from '../components/ClientList';
-import EmployeeList from '../components/EmployeeList';
-import DishList from '../components/DishList';
+import ClientList from '../components/admin-view/ClientList';
+import EmployeeList from '../components/admin-view/EmployeeList';
+import DishList from '../components/admin-view/DishList';
 // import RestaurantProfile from '../components/RestauInfo';
 import ReviewList from '../components/RviewList';
-import SalesList from '../components/SalesList';
-import MessageList from '../components/MessageList';
-import ActivityLog from '../components/Tracability';
+import SalesList from '../components/admin-view/SalesList';
+import MessageList from '../components/admin-view/MessageList';
+import ActivityLog from '../components/admin-view/Tracability';
 import Navbar from '../components/NavBar';
 
 const AppContent: React.FC = () => {

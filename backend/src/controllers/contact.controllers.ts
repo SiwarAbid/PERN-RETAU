@@ -4,7 +4,7 @@ import { prisma } from '../prisma';
 // Créer un nouveau contact
 export const createContact = async (req: Request, res: Response) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, subject, message, ...otherFields } = req.body;
     if (!name || !email || !subject || !message) {
       return res.status(400).json({ error: 'Nom, email, sujet et message requis' });
     }

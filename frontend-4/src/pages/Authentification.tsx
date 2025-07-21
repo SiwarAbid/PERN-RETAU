@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import FloatingIngredients from '../components/FloatingIngredients';
-import AuthCard from '../components/AuthCard';
+import FloatingIngredients from '../components/client-view/authentification/FloatingIngredients';
+import AuthCard from '../components/client-view/authentification/AuthCard';
 import '../assets/style/authentification.css'
 const Authntification: React.FC = () => {
   const [isDark, setIsDark] = useState<boolean>(false);

@@ -3,6 +3,7 @@ import { prisma } from '../prisma';
 import { hashPassword } from '../utils/hash';
 import { sendEmail } from './contact.controllers';
 import { Role } from '@prisma/client'; // Ajout de l'import de l'enum
+import { error } from 'console';
 
 // Créer un nouvel utilisateur
 export const createUser = async (req: Request, res: Response) => {
@@ -85,6 +86,7 @@ export const getUsers = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Role invalide' });
       }
       console.log('Role:', role);
+
       // Clients
         if (role === 'CLIENT') {
           let clients = await prisma.user.findMany({ where: { role: role as Role } });
@@ -110,14 +112,21 @@ export const getUsers = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Aucun employé trouvé' });
           res.json({ employees: employees });
         }
-        // Without Role ( All users)
         else {
-          let users = await prisma.user.findMany();
+          let users = await prisma.user.findMany({ where: { role: role as Role } });
           console.log('Users:', users);
           if (!users || users.length === 0) 
-            return res.status(404).json({ error: 'Aucun utilisateur trouvé' });
-          res.json({ users: users });
+            return res.status(404).json({error: `Aucun utilisateur trouvé pour ce rôle. ${role}`})
+          res.json(users);
         }
+      }
+      // Without Role ( All users)
+      else {
+        let users = await prisma.user.findMany();
+        console.log('Users:', users);
+        if (!users || users.length === 0) 
+          return res.status(404).json({ error: 'Aucun utilisateur trouvé' });
+        res.json({ users: users });
       }
 
   } catch (err: any) {

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Search, Star, MessageSquare, Calendar, User, Reply } from 'lucide-react';
-import type { Review } from '../types/user';
+// import type { Review } from '../types/user';
 
 const ReviewList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRating, setSelectedRating] = useState('');
 
   // Mock data
-  const reviews: Review[] = [
+  const reviews = [
     {
-      id: '1',
+      id: 1,
       clientName: 'Marie Dubois',
       rating: 5,
       comment: 'Excellente expérience ! Le service était impeccable et les plats délicieux. Je recommande vivement le coq au vin, un vrai délice. L\'ambiance est chaleureuse et le personnel très attentionné.',

@@ -8,6 +8,7 @@ export interface Restau {
     image: string,
     description: string,
     logo: string,
+    createdAt: Date
 }
 
 export interface Dish {
