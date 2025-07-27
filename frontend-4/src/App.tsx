@@ -6,14 +6,15 @@ import Menu from "./pages/Menu";
 import {Accueil, AccueilSections} from "./pages/ClientLayout";
 import ScrollManager from "./components/ScrolToTop";
 import { CartProvider } from "./context/CartContext";
-
+import { MessageProvider } from "./context/Messages";
 const App: React.FC = () => {
 
   return (
     
     
     <Router>
-            <CartProvider>
+      <CartProvider>
+      <MessageProvider>
       <ScrollManager/>
       <Routes>
 
@@ -32,7 +33,8 @@ const App: React.FC = () => {
       <Route path="/" element={<Authntification />} />
 
       </Routes>
-</CartProvider>
+      </MessageProvider>
+      </CartProvider>
     </Router>
     
       

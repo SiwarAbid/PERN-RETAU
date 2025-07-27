@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment } from 'react';
-import { ChevronLeft, ChevronRight, MoreHorizontal, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import DataLoadingState from '../../Loading';
 import { useCart } from '../../../hooks/useCart';
 import type { Dish } from '../../../types/dish'
@@ -94,24 +94,12 @@ const MenuSection = () => {
   const dishesPerPage = 4;
 
   const totalPages = Math.ceil(filteredDishes.length / dishesPerPage);
-  // const startIndex = (currentPage - 1) * dishesPerPage;
-  // const endIndex = startIndex + dishesPerPage;
-  // const currentDishes = filteredDishes.slice(startIndex, endIndex);
+  const startIndex = (currentPage - 1) * dishesPerPage;
+  const endIndex = startIndex + dishesPerPage;
+  const currentDishes = filteredDishes.slice(startIndex, endIndex);
 
   const goToPage = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const goToPrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const goToNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
   };
 
   // Génération des numéros de pages à afficher
@@ -123,32 +111,17 @@ const MenuSection = () => {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
+    } 
     
     return pages;
   };
+
+  useEffect(() => {
+    const newPage = Math.floor(currentDish / dishesPerPage) + 1;
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+    }
+  }, [currentDish]);
 
   return (
     <section id="menu" className="menu-section">
@@ -227,7 +200,7 @@ const MenuSection = () => {
           <div className="dish-indicators">
             <div className="indicators-title">Nos Plats</div>
             <div className="indicators-list">
-              {filteredDishes.map((dish, index) => (
+              {currentDishes.map((dish, index) => (
                 <button
                   key={dish.name}
                   className={`indicator ${index === currentDish ? 'active' : ''}`}
@@ -243,29 +216,29 @@ const MenuSection = () => {
                 </button>
               ))}
             </div>
+
+            {/* Progress Dots  */}
+              {totalPages > 1 && (
+              <div className="progress-dots pt-10">
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    className={`progress-dot ${index === currentPage-1 ? 'active' : ''}`}
+                    onClick={() => goToPage(page as number)} 
+                    />
+                ))}
+              </div>)}
           </div>
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            {/* Previous Button */}
-            <button
-              onClick={goToPrevious}
-              disabled={currentPage === 1}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                currentPage === 1
-                  ? 'bg-white/20 text-white/50 cursor-not-allowed'
-                  : 'bg-white/90 text-indigo-600 hover:bg-white hover:shadow-lg hover:transform hover:scale-105'
-              }`}
-            >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Précédent</span>
-            </button>
+        {/* 
+          <div className="flex items-center justify-center gap-2"> */}
+            
 
             {/* Page Numbers */}
-            <div className="flex items-center gap-1">
-              {getPageNumbers().map((page, index) => (
+            {/* <div className="flex items-center gap-1">
+              
                 <Fragment key={index}>
                   {page === '...' ? (
                     <div className="flex items-center justify-center w-10 h-10 text-white/70">
@@ -285,10 +258,10 @@ const MenuSection = () => {
                   )}
                 </Fragment>
               ))}
-            </div>
+            </div> */}
 
             {/* Next Button */}
-            <button
+            {/* <button
               onClick={goToNext}
               disabled={currentPage === totalPages}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
@@ -299,20 +272,10 @@ const MenuSection = () => {
             >
               <span className="hidden sm:inline">Suivant</span>
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </button> 
           </div>
-        )}
+        )}*/}
 
-        {/* Progress Dots  */}
-        <div className="progress-dots">
-          {filteredDishes.map((_, index) => (
-            <button
-              key={index}
-              className={`progress-dot ${index === currentDish ? 'active' : ''} ${filteredDishes.length > 5 ? 'hidden' : ''}`}
-              onClick={() => goToDish(index)}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );

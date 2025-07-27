@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import CategorySection from '../components/client-view/Menu/CategorySection';
 import PopularDishes from '../components/client-view/Menu/DishMenu';
-import Cart from '../components/client-view/Menu/Cart';
+// import Cart from '../components/client-view/Menu/Cart';
 import type { Dish } from '../types/dish';
 import { useCart } from '../hooks/useCart';
+import Cart from '../components/client-view/Menu/Cart';
 
     // // Salades
     // { id: '1', name: 'Fresh and Healthy Salad', description: 'Cucumber • Tomatoes • Lettuce', price: 2.85, image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1', category: 'salad' },
@@ -79,7 +80,7 @@ const App: React.FC = () => {
           </div>
 
           <div className="w-80">
-            <Cart 
+            <Cart
               onUpdateQuantity={updateQuantity}
               onCheckout={handleCheckout}
               onClearCart={clearCart}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { X, MapPin, Clock, Phone, Mail, CreditCard, Wallet, ChefHat } from 'lucide-react';
-import type { CartItem } from '../../../pages/Menu';
+import type { CartItem } from '../../../types/cart';
 import type { OrderData } from './OrderModel';
+import ReactDOM from 'react-dom';
 
 interface InvoiceProps {
   isOpen: boolean;
@@ -25,10 +26,10 @@ const Invoice: React.FC<InvoiceProps> = ({ isOpen, onClose, cartItems, orderData
   const handlePrint = () => {
     window.print();
   };
-
+const modalRoot = document.getElementById('root');
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto hide-scrollbar">
         <div className="top-0 bg-white p-6 flex items-center justify-between rounded-t-2xl">
@@ -148,7 +149,7 @@ const Invoice: React.FC<InvoiceProps> = ({ isOpen, onClose, cartItems, orderData
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-lg overflow-hidden">
                       <img
-                        src={item.image}
+                        src={`http://localhost:5000/uploads/${item.image}`}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
@@ -222,7 +223,7 @@ const Invoice: React.FC<InvoiceProps> = ({ isOpen, onClose, cartItems, orderData
           </div>
         </div>
       </div>
-    </div>
+    </div>, modalRoot!
   );
 };
 

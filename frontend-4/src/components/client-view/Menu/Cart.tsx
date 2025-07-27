@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import type { Category } from '../../../types/user';
 import OrderModal, { type OrderData } from './OrderModel';
 import Invoice from './Invoice';
+import { useMessageAlert } from '../../../hooks/useMessage';
 
 interface CartItem {
   id: number;
@@ -13,7 +14,7 @@ interface CartItem {
   category: Category;
 }
 
-interface CartProps {
+export interface CartProps {
   onUpdateQuantity: (name: string, quantity: number) => void;
   onCheckout?: () => void;
   onClearCart: () => void;
@@ -30,61 +31,53 @@ const Cart: React.FC<CartProps> = ({ onUpdateQuantity, onClearCart }) => {
   : '[]');
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discount = total * 0.1; // 10% discount
+  const discount = total * 0.1; // 10% discount ( pour ces qui passer leurs commandes sur nos sites )
   const final = total - discount;
+  const { alert: alertMessage } = useMessageAlert();
 
   const handleCheckout = () => {
     if (items.length === 0) {
-      alert('Votre panier est vide !');
+      alertMessage({typeMsg: 'warning', messageContent: 'Votre panier est vide !'});
       return;
     }
-    // Déclencher l'animation de la fusée
+    setIsLaunching(true);
     setShowOrderModal(true);
 
-    // Attendre la fin de l'animation avz=ant de procéder
+    // Simuler un temps de chargement ou une animation
     setTimeout(() => {
-      setShowOrderModal(true)
       setIsLaunching(false);
     }, 2000); // 2 secondes pour l'animation
   };
 
-  const handleConfirmOrder = async (orderData: OrderData) => {
+  const handleConfirmOrder = async (orderData: OrderData, e: React.FormEvent) => {
+    e.preventDefault();
     setOrderData(orderData);
-    setShowOrderModal(false);
-
-    // Génerer un numéro de commande
+    // Ceci est pour les paiements hors-ligne (ex: espèces)
+    // Nous devons afficher la facture.
     const orderNum = `SC${Date.now().toString().slice(-6)}`;
     setOrderNumber(orderNum);
-
-    if (orderData.paymentMethod === 'card') {
-      // Simuler le processus de paiement Stripe
-      const paymentSuccess = await simulateStripePayment(orderData);
-      if (paymentSuccess) {
-        // Vider le panier aprés paiement reussi
-        onClearCart();
-        setShowInvoice(true);
-      }
-      else alert('Erreur de paiement. Veuillez réessayer.')
-    }
-    else {
-      // Paiement en espéces - commande confirmé directement
-      onClearCart();
-      setShowInvoice(true);
-    }
-      }
-  const simulateStripePayment = async (data: OrderData): Promise<boolean> => {
-    console.log('Simulating Stripe payment...', data);
-    // Simulation d'un appel à Stripe
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simuler un succès de paiement (95% de réussite)
-        const success = Math.random() > 0.05;
-        resolve(success);
-      }, 2000);
-    });
+    setShowOrderModal(false);
+    setShowInvoice(true);
   };
-  return (  
-  <div className={`bg-white rounded-2xl p-6 shadow-lg`}>
+
+    useEffect(() => {
+      const query = new URLSearchParams(window.location.search);
+      const sessionId = query.get('session_id');
+  
+      if (sessionId) {
+        alertMessage({typeMsg: 'success', messageContent: 'Votre commande a été passée avec succès !'});
+        setShowOrderModal(false);
+        const pendingOrderDataString = sessionStorage.getItem('pendingOrderData');
+        if (pendingOrderDataString) {
+          const pendingOrderData = JSON.parse(pendingOrderDataString);
+          setOrderData(pendingOrderData);
+          setShowInvoice(true);
+          sessionStorage.removeItem('pendingOrderData'); // Nettoyer les données de session
+        }
+      }
+    }, []);
+  return (
+    <div className={`bg-white rounded-2xl p-6 shadow-lg`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
         <ShoppingCart className="w-5 h-5 text-gray-600" />
@@ -192,7 +185,7 @@ const Cart: React.FC<CartProps> = ({ onUpdateQuantity, onClearCart }) => {
         orderData={orderData}
         orderNumber={orderNumber}
       />
-    )}
+    )} 
     </div>    
   );
 };

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 import type { Restau } from '../../../types/accueil';
-import { message } from 'antd';
 import axios from 'axios';
+import { useMessageAlert } from '../../../hooks/useMessage';
 const ContactSection = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -13,6 +13,7 @@ const ContactSection = () => {
     message: ''
   });
 
+  const { alert: alertMessage } = useMessageAlert();
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -20,20 +21,13 @@ const ContactSection = () => {
       [name]: value
     }));
   };
-  const [messageApi, contextHolder] = message.useMessage();
 
   const success = () => {
-    messageApi.open({
-      type: 'success',
-      content: 'Message envoyé avec succès !',
-    });
+    alertMessage({typeMsg: 'success', messageContent: 'Message envoyé avec succès !'})  
   };
 
   const error = () => {
-    messageApi.open({
-      type: 'error',
-      content: 'Un erreur se produit lors de l\'envoi du message.',
-    });
+    alertMessage({typeMsg: 'error', messageContent: 'Un erreur se produit lors de l\'envoi du message.'})
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +89,6 @@ const ContactSection = () => {
           : 'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50'
         }`}
         >
-          {contextHolder}
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">

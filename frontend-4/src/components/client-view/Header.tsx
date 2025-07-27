@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Menu, X, User, Sun, Moon, ChefHat, LogOut, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useNavigate, Link } from 'react-router-dom';
-import Cart from './Menu/Cart';
 import { useCart } from '../../hooks/useCart';
+import Cart from './Menu/Cart';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,10 +99,10 @@ const Header = () => {
               <ShoppingCart className='icon icon-white' />
             </button>
             <div className={`absolute right-0 top-full mt-2 w-auto z-50  overflow-hidden ${isOpen ? 'block' : 'hidden'}`}>
-              <Cart 
-              onUpdateQuantity={updateQuantity}
-              onCheckout={handleCheckout}
-              onClearCart={clearCart}
+              <Cart
+                onUpdateQuantity={updateQuantity}
+                onCheckout={handleCheckout}
+                onClearCart={clearCart}
               />
             </div>
             {/* Logout button */}

@@ -40,9 +40,8 @@ const LoginPage: React.FC = () => {
           localStorage.setItem('token', data.token);
           localStorage.setItem('isAuthenticated', 'true');
           localStorage.setItem('user', JSON.stringify(data.user));
-          alert('Bienvenue dans notre cuisine ! 👨‍🍳');
       
-          if (localStorage.getItem('token') === data.token && data.user.role == 'ADMIN')
+          if (data.user.role == 'ADMIN')
             navigate('/admin')
           else throw new Error("Your token is invalid")
           return true;

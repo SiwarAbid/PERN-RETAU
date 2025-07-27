@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { X, MapPin, CreditCard, Wallet, User, Phone, Mail, Home } from 'lucide-react';
-import type { CartItem } from '../../../pages/Menu';
+import type { CartItem } from '../../../types/cart';
+import { useMessageAlert } from '../../../hooks/useMessage';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
+import ReactDOM from 'react-dom';
+import PaymentForm from './PaymentForm';
 
-interface OrderModalProps {
+export interface OrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItem[];
-  onConfirmOrder: (orderData: OrderData) => void;
+  onConfirmOrder: (orderData: OrderData, e: React.FormEvent) => void;
 }
 
 export interface OrderData {
@@ -20,13 +24,15 @@ export interface OrderData {
     address?: string;
     city?: string;
     postalCode?: string;
+
   };
   saveInfo: boolean;
   total: number;
   deliveryFee: number;
   finalTotal: number;
 }
-
+// Assurez-vous que cet ID correspond à celui dans votre index.html
+  const modalRoot = document.getElementById('root');
 const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onConfirmOrder }) => {
   const [orderType, setOrderType] = useState<'delivery' | 'takeaway'>('delivery');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('card');
@@ -47,17 +53,64 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
   const deliveryFee = orderType === 'delivery' ? 3.50 : 0;
   const finalTotal = total + deliveryFee;
 
+  const { alert: alertMessage } = useMessageAlert();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const STRIPE_PUBLISHABLE_KEY = "pk_test_51PBBWfETHdk5m0pyx9uTou4pF18cLccidsr3lzviSVjM02NLwhEPMInZdPbcHIM9ngcUENlvs6i9Hx6T4HhqD9iu00FWjxoRbW";
+  const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY) as Promise<Stripe>;
+
+  const [isShowPaymentForm, ShowPaymentForm] = useState(false);
+
+
+  const fetchClientSecret = useCallback(async () => {
+    if (cartItems.length === 0) {
+      alertMessage({ typeMsg: 'warning', messageContent: 'Le panier est vide' });
+    }
+
+    try {
+      if (!stripePromise) {
+        throw new Error('Stripe is not initialized');
+      }
+      if (paymentMethod !== 'card') {
+        throw new Error('Le paiement par carte est requis pour cette commande');
+      }
+      // Appel à l'API pour créer une session de paiement
+      console.log('Fetching client secret...');
+      const response = await fetch('http://localhost:5000/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: cartItems, deliveryFee: deliveryFee }) // Montant en cents
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la création du paiement: ' + response.statusText);
+      }
+
+      const data = await response.json();
+      console.log('Payment intent response:', data);
+      // Vérifier si le clientSecret est présent dans la réponse
+      if (!data.checkoutSessionClientSecret) {
+        throw new Error('Client secret manquant dans la réponse');
+      }
+      console.log('Client secret:', data.checkoutSessionClientSecret);
+      setClientSecret(data.checkoutSessionClientSecret);
+    } catch (error) {
+      console.error('Erreur lors de la récupération du client secret:', error);
+    }
+  }, [cartItems]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
     if (!customerInfo.firstName || !customerInfo.lastName || !customerInfo.email || !customerInfo.phone) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      alertMessage({ typeMsg: 'warning', messageContent: 'Veuillez remplir tous les champs obligatoires' });
       return;
     }
 
     if (orderType === 'delivery' && (!customerInfo.address || !customerInfo.city || !customerInfo.postalCode)) {
-      alert('Veuillez remplir l\'adresse complète pour la livraison');
+      alertMessage({ typeMsg: 'warning', messageContent: 'Veuillez remplir l\'adresse complète pour la livraison' });
       return;
     }
 
@@ -70,15 +123,28 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
       deliveryFee,
       finalTotal
     };
-
-    onConfirmOrder(orderData);
+    
+    if (paymentMethod === 'card') {
+      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+      ShowPaymentForm(true);
+      fetchClientSecret();
+      return;
+    }
+    onConfirmOrder(orderData, e);
   };
+
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto hide-scrollbar">
+
+
+
+
+
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+
+        <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto hide-scrollbar">
         <div className="top-0 bg-white p-6 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-800">Finaliser la commande</h2>
           <button
@@ -88,7 +154,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
             <X className="w-5 h-5" />
           </button>
         </div>
-
+      {isShowPaymentForm ? (
+        <PaymentForm clientSecret={clientSecret ? clientSecret : ''} stripePromise={stripePromise} />
+      ) : (
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Type de commande */}
           <div>
@@ -277,7 +345,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
                 </div>
               </div>
             )}
-
             {/* Sauvegarder les informations */}
             <div className="mt-4">
               <label className="flex items-center space-x-2 cursor-pointer">
@@ -335,10 +402,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
               {paymentMethod === 'card' ? 'Payer maintenant' : 'Confirmer la commande'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
-  );
+        </form> )}
+      </div> 
+    </div>, modalRoot!);
 };
 
 export default OrderModal;
