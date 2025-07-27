@@ -24,11 +24,11 @@ const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart, sele
   };
   const categoryRandomVideo = sessionStorage.getItem('categorieRandomVideo') ? sessionStorage.getItem('categorieRandomVideo') as string : '';
   const nomRandomVideo  = sessionStorage.getItem('nomRamdomVideo') ? sessionStorage.getItem('nomRamdomVideo') as string : '';
-
+  
   // dish name contient nomRandomVideo
 
   const dishesRandomVideo = dishes.filter(dish => categoryRandomVideo === '' || (dish.category.name === categoryRandomVideo || dish.name.includes(nomRandomVideo)));
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   return (
     <div>
       <h3 className="text-xl font-bold text-gray-800 mb-6">
@@ -49,7 +49,7 @@ const PopularDishes: React.FC<PopularDishesProps> = ({ dishes, onAddToCart, sele
           >
             <div className="w-full h-32 rounded-xl overflow-hidden mb-4">
               <img
-                src={`http://localhost:5000/uploads/${dish.image}`}
+                src={` ${apiBaseUrl}/uploads/${dish.image}`}
                 alt={dish.name}
                 className="w-full h-full object-cover"
               />

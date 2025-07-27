@@ -44,7 +44,8 @@ export const Accueil: React.FC = () => {
       setLoading(true);
       setError(null);
         try {
-          const response = await fetch('http://localhost:5000/dishes', {
+          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+          const response = await fetch(`${apiBaseUrl}/dishes`, {
             credentials: 'include',
           });
           if (!response.ok) {

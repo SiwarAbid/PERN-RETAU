@@ -69,10 +69,11 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     setIsLoading(true);
     setError(null);
       try {
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
         const endpoint =
           authMode === 'login'
-            ? 'http://localhost:5000/auth/login'
-            : 'http://localhost:5000/auth/register';
+            ? `${apiBaseUrl}/auth/login`
+            : `${apiBaseUrl}/auth/register`;
 
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -116,8 +117,9 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     console.log(`Connexion avec ${provider}`);
     console.log(JSON.stringify({formData, provider}))
     // Logique de connexion sociale ici
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
     const popup: Window | null = window.open(
-      `http://localhost:5000/auth/${provider.toLowerCase()}/${authMode}`,
+      `${apiBaseUrl}/auth/${provider.toLowerCase()}/${authMode}`,
       'oauthPopup',
       'width=500,height=600'
     );
@@ -127,7 +129,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
     // Écoute les messages du backend (via postMessage)
     const messageListener = (event: MessageEvent) => {
       console.log('Message reçu :', event);
-      if (event.origin !== 'http://localhost:5000') return;
+      if (event.origin !== apiBaseUrl) return;
       if (!event.data.success) {
         setError({
           message: event.data.message,

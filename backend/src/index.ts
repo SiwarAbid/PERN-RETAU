@@ -17,23 +17,38 @@ import paymentRouter from './config/payementStripe';
 import flash from 'connect-flash';
 import Stripe from 'stripe';
 import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const app = express();
-app.use(require('cors')({
-  origin: 'http://localhost:5173',
+// Configuration CORS dynamique
+const allowedOrigins = ['http://localhost:5173', process.env.FRONTEND_URL_LOCAL];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true
 }));
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.get('/', (req, res) => {
   res.send('Bienvenue sur le backend du restaurant 🍽️');
 });
 
+const HOST = '0.0.0.0'; // Permet d'écouter sur toutes les interfaces réseau
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-});
 
+app.listen(Number(PORT), HOST, () => {
+  console.log(`🚀 Serveur démarré et accessible sur le réseau à l'adresse http://${process.env.BACKEND_URL?.split('//')[1]}`);
+  console.log(`Autorise les requêtes depuis : ${allowedOrigins.join(' et ')}`);
+});
 
 app.use(flash());
 app.use(passport.initialize());
@@ -68,7 +83,7 @@ app.post('/create-checkout-session', async (req, res) => {
                 currency: 'eur', // Change to your desired currency
                 product_data: {
                     name: item.name,
-                    images: item.image ? [`http://localhost:5000/uploads/${item.image}`] : [],
+                    images: item.image ? [`${process.env.BACKEND_URL}/uploads/${item.image}`] : [],
                 },
                 unit_amount: unitAmountInCents, 
             },
@@ -82,7 +97,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     currency: 'eur', // Change to your desired currency
                     product_data: {
                         name: 'Frais de livraison',
-                    images: ['http://localhost:5000/uploads/delivery.png'], // Example image
+                        images: [`${process.env.BACKEND_URL}/uploads/delivery.png`], // Example image
                 },
                 unit_amount: deliveryFee * 100, // 3.5 eur delivery
             },
@@ -102,7 +117,7 @@ app.post('/create-checkout-session', async (req, res) => {
             line_items: lineItems,
             mode: 'payment',
             ui_mode: 'embedded',
-            return_url: `http://localhost:5173/accueil?session_id={CHECKOUT_SESSION_ID}`,
+            return_url: `${process.env.FRONTEND_URL_LOCAL || 'http://localhost:5173'}/accueil?session_id={CHECKOUT_SESSION_ID}`,
         });
         console.log("Session: ", session);
 

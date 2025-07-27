@@ -13,11 +13,12 @@ const ChefsSection = () => {
     "https://images.pexels.com/photos/4253313/pexels-photo-4253313.jpeg?auto=compress&cs=tinysrgb&w=800",
     "https://images.pexels.com/photos/4253320/pexels-photo-4253320.jpeg?auto=compress&cs=tinysrgb&w=800"
   ]
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   
   useEffect(() => {
     const fetchChefs = async () => {
       try {
-        const response = await fetch('http://localhost:5000/users?role=CHEF');
+        const response = await fetch(` ${apiBaseUrl}/users?role=CHEF`);
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des chefs');
         }
@@ -56,7 +57,7 @@ const ChefsSection = () => {
               <div className="chef-image-container">
                 <img src={
                   chef.image 
-                  ? `http://localhost:5000/uploads/${chef.image}`
+                  ? ` ${apiBaseUrl}/uploads/${chef.image}`
                   : images[index]
                   }
                   alt={chef.name} className="chef-image" 

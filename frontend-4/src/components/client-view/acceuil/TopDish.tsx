@@ -95,8 +95,8 @@ const AddToCartAlert = () => {
         return "badge-default";
     }
   };
-
-const { addToCart } = useCart();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const { addToCart } = useCart();
     // throw new Error('Function not implemented.');
 
   return (
@@ -132,7 +132,7 @@ const { addToCart } = useCart();
 
               {/* Image Container */}
               <div className="dish-image-1-container">
-                <img src={`http://localhost:5000/uploads/${dish.image}`} alt={dish.name} className="dish-image" />
+                <img src={` ${apiBaseUrl}/uploads/${dish.image}`} alt={dish.name} className="dish-image" />
               </div>
 
               {/* Content */}

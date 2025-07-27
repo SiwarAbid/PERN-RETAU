@@ -30,6 +30,8 @@ const ContactSection = () => {
     alertMessage({typeMsg: 'error', messageContent: 'Un erreur se produit lors de l\'envoi du message.'})
   };
 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Ici vous pouvez ajouter la logique d'envoi du formulaire
@@ -41,7 +43,7 @@ const ContactSection = () => {
       subject: '',
       message: ''
     });
-    await axios.post('http://localhost:5000/add-contact', formData).then(res => {
+    await axios.post(` ${apiBaseUrl}/add-contact`, formData).then(res => {
       console.log(res);
       success();
     }).catch(err => {

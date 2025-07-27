@@ -123,6 +123,7 @@ const MenuSection = () => {
     }
   }, [currentDish]);
 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   return (
     <section id="menu" className="menu-section">
       <div className="container">
@@ -178,7 +179,7 @@ const MenuSection = () => {
             <div className={`dish-circle ${isRotating ? 'rotating' : ''}`}>
               <div className="dish-image-container">
                 <img 
-                  src={`http://localhost:5000/uploads/${currentDishData.image}`}
+                  src={` ${apiBaseUrl}/uploads/${currentDishData.image}`}
                   alt={currentDishData.name}
                   className="dish-image"
                 />
@@ -207,7 +208,7 @@ const MenuSection = () => {
                   onClick={() => goToDish(index)}
                 >
                   <div className="indicator-image">
-                    <img src={`http://localhost:5000/uploads/${dish.image}`} alt={dish.name} />
+                    <img src={` ${apiBaseUrl}/uploads/${dish.image}`} alt={dish.name} />
                   </div>
                   <div className="indicator-info">
                     <span className="indicator-name">{dish.name}</span>

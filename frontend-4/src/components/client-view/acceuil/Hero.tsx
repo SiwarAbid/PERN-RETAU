@@ -82,7 +82,8 @@ const Hero: React.FC<HeroProps> = () => {
   localStorage.setItem('currentCategory', JSON.stringify(randomVideo.categories));
 
   useEffect(() => {
-    axios.get("http://localhost:5000/restau/last").then(res => {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    axios.get(`${apiBaseUrl}/restau/last`).then(res => {
       setRestau(res.data)
       console.log(res.data)
       localStorage.setItem('restaurant', JSON.stringify(res.data));

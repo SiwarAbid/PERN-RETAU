@@ -17,13 +17,14 @@ const ClientList: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [hiddenClients, setHiddenClients] = useState<number[]>([]); // IDs masqués
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://localhost:5000/users?role=CLIENT', {
+        const response = await fetch(`${apiBaseUrl}/users?role=CLIENT`, {
           credentials: 'include',
         });
         if (!response.ok) {
@@ -110,7 +111,7 @@ const ClientList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:5000/add-user', {
+      const response = await fetch(`${apiBaseUrl}/add-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +141,7 @@ const ClientList: React.FC = () => {
     setError(null);
     try {
       console.log('Hello here frontned Edit Client !! --- ')
-      const response = await fetch(`http://localhost:5000/update-user/${selectedClient.id}`, {
+      const response = await fetch(`${apiBaseUrl}/update-user/${selectedClient.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +174,7 @@ const ClientList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5000/delete-user/${selectedClient.id}`, {
+      const response = await fetch(` ${apiBaseUrl}/delete-user/${selectedClient.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

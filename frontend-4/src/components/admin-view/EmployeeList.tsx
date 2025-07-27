@@ -17,13 +17,13 @@ const EmployeeList: React.FC = () => {
   const [hiddenEmployees, setHiddenEmployees] = useState<number[]>([]); // IDs masqués
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [departmentFilter, setDepartmentFilter] = useState<string>('');
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://localhost:5000/users?role=EMPLOYEE', {
+        const response = await fetch(` ${apiBaseUrl}/users?role=EMPLOYEE`, {
           credentials: 'include',
         });
         if (!response.ok) {
@@ -167,7 +167,7 @@ const EmployeeList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:5000/add-user', {
+      const response = await fetch(` ${apiBaseUrl}/add-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const EmployeeList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5000/delete-user/${selectedEmployee.id}`, {
+      const response = await fetch(` ${apiBaseUrl}/delete-user/${selectedEmployee.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -233,7 +233,7 @@ const EmployeeList: React.FC = () => {
     console.log('selectedEmployee', selectedEmployee)
     try {
       console.log('Hello here frontned Edit Client !! --- ')
-      const response = await fetch(`http://localhost:5000/update-user/${selectedEmployee.id}`, {
+      const response = await fetch(` ${apiBaseUrl}/update-user/${selectedEmployee.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

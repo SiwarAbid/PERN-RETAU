@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [, setIsLoading] = useState<boolean>(false);
   const [, setError] = useState<AuthError | null>(null);
   const navigate = useNavigate();
-  
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const login = useCallback(
     async (email: string, password: string, authMode: string = 'login'): Promise<boolean> => {
       setIsLoading(true);
@@ -40,8 +40,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const endpoint =
           authMode === 'login'
-            ? 'http://localhost:5000/auth/login'
-            : 'http://localhost:5000/auth/register';
+            ? ` ${apiBaseUrl}/auth/login`
+            : ` ${apiBaseUrl}/auth/register`;
 
         const response = await fetch(endpoint, {
           method: 'POST',

@@ -15,11 +15,11 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({ selectedCategory, onCategoryChange, totalFood }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   useEffect(()=>{
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:5000/categories', {
+        const response = await fetch(` ${apiBaseUrl}/categories`, {
           credentials: 'include',
         });
         if (!response.ok) {
@@ -87,7 +87,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ selectedCategory, onC
               rounded-xl overflow-hidden mx-auto mb-3
             `}>
               <img
-                src={`http://localhost:5000/uploads/${category.imaage}`}
+                src={` ${apiBaseUrl}/uploads/${category.imaage}`}
                 alt={category.name}
                 className="w-full h-full object-cover"
               />

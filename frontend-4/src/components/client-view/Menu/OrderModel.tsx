@@ -59,7 +59,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
   const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY) as Promise<Stripe>;
 
   const [isShowPaymentForm, ShowPaymentForm] = useState(false);
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const fetchClientSecret = useCallback(async () => {
     if (cartItems.length === 0) {
@@ -75,7 +75,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
       }
       // Appel à l'API pour créer une session de paiement
       console.log('Fetching client secret...');
-      const response = await fetch('http://localhost:5000/create-checkout-session', {
+      const response = await fetch(` ${apiBaseUrl}/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

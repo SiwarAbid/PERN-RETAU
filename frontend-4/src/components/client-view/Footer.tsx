@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Twitter, ChefHat, Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Restau } from '../../types/accueil';
 
 const Footer = () => {
@@ -22,21 +23,21 @@ const Footer = () => {
               </p>
               <div className="footer-social">
                 <a
-                  href="http://www.facebook.com/sweetcorner"
+                  href=" www.facebook.com/sweetcorner"
                   className="footer-social-link"
                   aria-label="Facebook"
                 >
                   <Facebook className="icon" />
                 </a>
                 <a
-                  href="http://www.instagram.com/sweetcorner"
+                  href=" www.instagram.com/sweetcorner"
                   className="footer-social-link"
                   aria-label="Instagram"
                 >
                   <Instagram className="icon" />
                 </a>
                 <a
-                  href="http://www.twitter.com/sweetcorner"
+                  href=" www.twitter.com/sweetcorner"
                   className="footer-social-link"
                   aria-label="Twitter"
                 >
@@ -50,29 +51,29 @@ const Footer = () => {
               <h3 className="footer-section-title">Navigation</h3>
               <ul className="footer-links">
                 <li>
-                  <a href="#accueil" className="footer-link">
+                  <Link to="/accueil" className="footer-link">
                     Accueil
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="http://localhost:5173/menu" className="footer-link">
+                  <Link to="/menu" className="footer-link">
                     Menu
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#chefs" className="footer-link">
+                  <Link to="/accueil#chefs" className="footer-link">
                     Nos Chefs
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#about" className="footer-link">
+                  <Link to="/accueil#about" className="footer-link">
                     À propos
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#contact" className="footer-link">
+                  <Link to="/accueil#contact" className="footer-link">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

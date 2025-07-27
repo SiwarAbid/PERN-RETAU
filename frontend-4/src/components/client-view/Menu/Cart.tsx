@@ -29,7 +29,7 @@ const Cart: React.FC<CartProps> = ({ onUpdateQuantity, onClearCart }) => {
   const items: CartItem[] = JSON.parse(localStorage.getItem('cartItems')
   ? localStorage.getItem('cartItems') as string
   : '[]');
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discount = total * 0.1; // 10% discount ( pour ces qui passer leurs commandes sur nos sites )
   const final = total - discount;
@@ -107,7 +107,7 @@ const Cart: React.FC<CartProps> = ({ onUpdateQuantity, onClearCart }) => {
           <div key={index} className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-lg overflow-hidden">
               <img
-                src={`http://localhost:5000/uploads/${item.image}`}
+                src={` ${apiBaseUrl}/uploads/${item.image}`}
                 alt={item.name}
                 className="w-full h-full object-cover"
               />

@@ -7,6 +7,7 @@ const AboutSection = () => {
   const dishes : Dish[] = localStorage.getItem('dishes') ? JSON.parse(localStorage.getItem('dishes') as string) : [];
   const restau : Restau = localStorage.getItem('restaurant') ? JSON.parse(localStorage.getItem('restaurant') as string) : {};
   const AnneeXcellence = new Date().getFullYear() - new Date(restau.createdAt).getFullYear();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   return (
     <section id="about" className="about-section">
       <div className="container">
@@ -56,7 +57,7 @@ const AboutSection = () => {
               <img 
                 src={
                   (restau && restau.image)
-                  ? `htttps://localhost:5000/uploads/${restau.image}`
+                  ? `htttps://${apiBaseUrl}/uploads/${restau.image}`
                   : "https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?auto=compress&cs=tinysrgb&w=800"} 
                 alt="Notre restaurant" 
                 className="story-img"

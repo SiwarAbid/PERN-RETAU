@@ -17,14 +17,14 @@ const DishList: React.FC = () => {
     const [categorieFilter, setCategorieFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [categories, setCategories] = useState<Category[]>([]);
-  
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
       const fetchdishes = async () => {
         setLoading(true);
         setError(null);
         try {
-          const response = await fetch('http://localhost:5000/dishes', {
+          const response = await fetch(` ${apiBaseUrl}/dishes`, {
             credentials: 'include',
           });
           if (!response.ok) {
@@ -46,7 +46,7 @@ const DishList: React.FC = () => {
       const getCategory = async () => {
       
       try {
-        const response = await fetch('http://localhost:5000/categories', {
+        const response = await fetch(` ${apiBaseUrl}/categories`, {
           credentials: 'include',
         });
         console.log(response)
@@ -126,7 +126,7 @@ const DishList: React.FC = () => {
         formData.append('isAvailable', data.isAvailable as string); // "true" ou "false"
         formData.append('image', data.image as File); // ici file est un objet File (e.target.files[0])
         console.log('Data: ', data)
-        const response = await fetch('http://localhost:5000/add-dish', {
+        const response = await fetch(` ${apiBaseUrl}/add-dish`, {
           method: 'POST',
           body: formData,
         });
@@ -161,7 +161,7 @@ const DishList: React.FC = () => {
         formData.append('price', data.price as string);
         formData.append('isAvailable', data.isAvailable as string); // "true" ou "false"
         formData.append('image', data.image as File); // ici file est un objet File (e.target.files[0])
-        const response = await fetch(`http://localhost:5000/update-dish/${selectedDish.id}`, {
+        const response = await fetch(` ${apiBaseUrl}/update-dish/${selectedDish.id}`, {
           method: 'PUT',
           body: formData,
         });
@@ -192,7 +192,7 @@ const DishList: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:5000/delete-dish/${selectedDish.id}`, {
+        const response = await fetch(` ${apiBaseUrl}/delete-dish/${selectedDish.id}`, {
           method: 'DELETE',
           credentials: 'include',
         });
@@ -300,7 +300,7 @@ const DishList: React.FC = () => {
             <div key={dish.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200">
               <div className="relative">
                 <img
-                  src={`http://localhost:5000/uploads/${dish.image}`}
+                  src={` ${apiBaseUrl}/uploads/${dish.image}`}
                   alt={dish.name}
                   className="w-full h-48 object-cover" />
                 {!dish.isAvailable && (

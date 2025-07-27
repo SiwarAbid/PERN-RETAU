@@ -22,7 +22,7 @@ const Invoice: React.FC<InvoiceProps> = ({ isOpen, onClose, cartItems, orderData
   });
 
   const estimatedTime = orderData.orderType === 'delivery' ? '30-45 min' : '15-20 min';
-
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const handlePrint = () => {
     window.print();
   };
@@ -149,7 +149,7 @@ const modalRoot = document.getElementById('root');
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-lg overflow-hidden">
                       <img
-                        src={`http://localhost:5000/uploads/${item.image}`}
+                        src={` ${apiBaseUrl}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
