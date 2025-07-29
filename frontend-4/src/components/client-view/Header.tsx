@@ -17,7 +17,7 @@ const Header = () => {
     <Link key="home" to="/accueil" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Accueil</Link>,
     <Link key="menu" to="/menu" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Menu</Link>,
     <Link key="profil" to="/profil" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Profile</Link>,
-    <Link key="about" to="/accueil#about" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>À propos</Link>,
+    <Link key="orders" to="/orders" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Mes commandes</Link>,
     <Link key="contact" to="/accueil#contact" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Contact</Link>,
   ];
 

@@ -109,15 +109,23 @@ model Contact {
 
 model Order {
   id          Int      @id @default(autoincrement())
+  orderNumber String   @unique
+  orderType   String   @default("delivery")
   user        User?     @relation(fields: [userId], references: [id])
   userId      Int?
   totalAmount Int      // Stocker en centimes
   status      String   @default("PENDING")
   createdAt   DateTime @default(now())
+  completedAt DateTime?
   updatedAt   DateTime?
   items       OrderItem[]
   payment     Payment?
   deliveryFee Int      @default(0)
+  notes       String?
+  rating      Int?
+  review      String?
+  canReorder  Boolean  @default(false)
+  deleveryAddress String?
 }
 
 model OrderItem {

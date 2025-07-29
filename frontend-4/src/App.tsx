@@ -8,6 +8,8 @@ import ScrollManager from "./components/ScrolToTop";
 import { CartProvider } from "./context/CartContext";
 import { MessageProvider } from "./context/Messages";
 import LoyaltyPage from "./pages/Loyality";
+import { OrderArchive } from "./components/client-view/orderArchive/OrderArchive";
+
 const App: React.FC = () => {
 
   return (
@@ -25,6 +27,7 @@ const App: React.FC = () => {
           <Route path="/accueil" element={<AccueilSections />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/profil" element={<LoyaltyPage />} />
+          <Route path="/orders" element={<OrderArchive />} />
         </Route>
       
     {/* Routes Admin */}
