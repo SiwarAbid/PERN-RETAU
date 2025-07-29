@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../prisma';
-import { hashPassword } from '../utils/hash';
+import { hashPassword, comparePasswords } from '../utils/hash'; // à créer si tu ne l'as pas
 import { sendEmail } from './contact.controllers';
 import { Role } from '@prisma/client'; // Ajout de l'import de l'enum
 import { error } from 'console';
@@ -149,36 +149,49 @@ export const getUserById = async (req: Request, res: Response) => {
 // Mettre à jour un utilisateur
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    console.log("hello here  backend uPDATE USER  ---")
+    console.log("hello here  backend UPDATE USER ---");
     console.log("Here my body -- ", req.body);
 
-    // On extrait le mot de passe pour le traiter à part, tout le reste est dynamique
-    const { password, ...otherFields } = req.body;
-    
+    const { password, oldPassword, ...otherFields } = req.body;
+
+    // Gestion image
+    if (req.file) {
+      otherFields.image = req.file.filename; // ou req.file.filename selon ton besoin
+    }
+
+    // Gestion des autres champs
     if (otherFields.isActived === 'true') otherFields.isActived = true;
     else if (otherFields.isActived === 'false') otherFields.isActived = false;
+    if (otherFields.phone) otherFields.phone = otherFields.phone.replace(/\D/g, '');
+    if (otherFields.salary) otherFields.salary = Number(otherFields.salary);
+    if (otherFields.dateEmbauche) otherFields.dateEmbauche = new Date(otherFields.dateEmbauche);
+    if (otherFields.role) otherFields.role = otherFields.role.toUpperCase();
 
-    if(otherFields.phone) otherFields.phone = otherFields.phone.replace(/\D/g, '');
-    if(otherFields.salary) otherFields.salary = Number(otherFields.salary);
-    if(otherFields.dateEmbauche) otherFields.dateEmbauche = new Date(otherFields.dateEmbauche);
-    if(otherFields.role) otherFields.role = otherFields.role.toUpperCase()
     let data = { ...otherFields };
 
-    // Si un mot de passe est fourni, on le hash avant de l'enregistrer
+    // Gestion du mot de passe
     if (password) {
+      const user = await prisma.user.findUnique({ where: { id: Number(req.params.id) } });
+      if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+      // Vérification de l'ancien mot de passe
+      if (!oldPassword) return res.status(400).json({ error: 'Ancien mot de passe requis' });
+      const isValid = await comparePasswords(oldPassword, user.password);
+      if (!isValid) return res.status(400).json({ error: 'Ancien mot de passe incorrect' });
+
       data.password = await hashPassword(password);
     }
 
-    // Mise à jour dynamique de tous les champs reçus dans le body
-    const user = await prisma.user.update({
+    // Mise à jour dynamique
+    const updatedUser = await prisma.user.update({
       where: { id: Number(req.params.id) },
-      data :{
+      data: {
         role: data.role as Role,
         ...data
       }
     });
 
-    res.json(user);
+    res.json(updatedUser);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

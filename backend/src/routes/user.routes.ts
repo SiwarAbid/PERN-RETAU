@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { upload } from '../middlewares/upload';
 import {
     createUser,
     getUsers,
@@ -22,7 +23,9 @@ router.get('/users', (req, res, next) => {
 router.get('/user/:id', (req, res, next) => {
     getUserById(req, res).catch(next)
 });
-router.put('/update-user/:id', updateUser);
+router.put('/update-user/:id', upload.single('image'), (req, res, next) => {
+    updateUser(req, res).catch(next);
+});
 router.delete('/delete-user/:id', deleteUser);
 
 export {router as userRouter};

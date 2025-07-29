@@ -80,9 +80,9 @@ const Hero: React.FC<HeroProps> = () => {
   if (filtredVideos.length === 0) console.log('Aucun video !!')
   const randomVideo = filtredVideos[Math.floor(Math.random() * filtredVideos.length)]
   localStorage.setItem('currentCategory', JSON.stringify(randomVideo.categories));
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
     axios.get(`${apiBaseUrl}/restau/last`).then(res => {
       setRestau(res.data)
       console.log(res.data)

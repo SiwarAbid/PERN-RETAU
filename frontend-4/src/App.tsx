@@ -7,6 +7,7 @@ import {Accueil, AccueilSections} from "./pages/ClientLayout";
 import ScrollManager from "./components/ScrolToTop";
 import { CartProvider } from "./context/CartContext";
 import { MessageProvider } from "./context/Messages";
+import LoyaltyPage from "./pages/Loyality";
 const App: React.FC = () => {
 
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
         <Route element={<Accueil />}>
           <Route path="/accueil" element={<AccueilSections />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/profil" element={<LoyaltyPage />} />
         </Route>
       
     {/* Routes Admin */}

@@ -16,7 +16,7 @@ const Header = () => {
   const navItems = [
     <Link key="home" to="/accueil" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Accueil</Link>,
     <Link key="menu" to="/menu" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Menu</Link>,
-    <Link key="chefs" to="/accueil#chefs" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Nos Chefs</Link>,
+    <Link key="profil" to="/profil" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Profile</Link>,
     <Link key="about" to="/accueil#about" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>À propos</Link>,
     <Link key="contact" to="/accueil#contact" className={isMobile() ? 'nav-link-mobile' : 'nav-link'}>Contact</Link>,
   ];
@@ -41,7 +41,7 @@ const Header = () => {
   };
 
     
-
+const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
   return (
     <header className="header">
@@ -79,15 +79,27 @@ const Header = () => {
 
               <div className="relative group">
             {/* Profile avatar */}
-            <button className={`profile-btn ${isConnected 
+            { (user && user.image)
+              ?
+                <button
+                  className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border-0 focus:outline-none ${
+                    isConnected
+                      ? 'ring ring-green-500 ring-opacity-50 hover:ring-opacity-75 duration-300 transition-all'
+                      : ''
+                  }`}
+                >
+                  <img
+                    src={`${apiBase}/uploads/${user.image}`}
+                    alt={user.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </button>
+              : <button className={`profile-btn ${isConnected 
                     ? 'ring ring-green-500 ring-opacity-50 hover:ring-opacity-75 duration-300 transition-all' 
                     : ''
-                  }`}>
-            { (user && user.image)
-              ? <img src={user.image} className="icon icon-white" alt={user.name} />
-              : <User className="icon icon-white"/> 
-            }
-            </button>
+                  } w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white p-0`}>
+              <User className="icon icon-white" />
+            </button>}
             {isConnected && user?.name && (
               <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 rounded bg-white text-gray-800 text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
                 {user.name}

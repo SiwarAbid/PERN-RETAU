@@ -61,7 +61,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
   const [isShowPaymentForm, ShowPaymentForm] = useState(false);
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const fetchClientSecret = useCallback(async () => {
+  const fetchClientSecret = useCallback(async (orderData: OrderData) => {
     if (cartItems.length === 0) {
       alertMessage({ typeMsg: 'warning', messageContent: 'Le panier est vide' });
     }
@@ -80,7 +80,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ items: cartItems, deliveryFee: deliveryFee }) // Montant en cents
+        body: JSON.stringify({ items: cartItems, deliveryFee: deliveryFee, orderData }) // Montant en cents
       });
 
       if (!response.ok) {
@@ -127,7 +127,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, cartItems, onC
     if (paymentMethod === 'card') {
       sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
       ShowPaymentForm(true);
-      fetchClientSecret();
+      fetchClientSecret(orderData);
       return;
     }
     onConfirmOrder(orderData, e);

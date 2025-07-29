@@ -9,7 +9,7 @@ export interface Dish {
   category: Category;
   createdAt: Date;
   rating: number;
-  isAvailable: boolean;
+  isAvailable?: boolean;
 }
 
 export interface TopDish {

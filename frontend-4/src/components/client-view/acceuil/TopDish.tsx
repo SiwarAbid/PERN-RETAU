@@ -1,8 +1,7 @@
 import { Star, Heart, Award, TrendingUp, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { TopDish } from '../../../types/dish'
+import type { TopDish, Dish } from '../../../types/dish'
 import { useCart } from '../../../hooks/useCart';
-
 
 const TopDishes = () => {
   const dishes = localStorage.getItem('dishes') ? (JSON.parse(localStorage.getItem('dishes') as string) ) : [];
@@ -151,7 +150,7 @@ const AddToCartAlert = () => {
 
                 <div className="dish-footer">
                   <div className="dish-price">{dish.price} TND</div>
-                  <button className="order-btn" onClick={() => addToCart(dish)}>
+                  <button className="order-btn" onClick={() => addToCart(dish as Dish)}>
                     <span>Commander</span>
                   </button>
                   {isShow ? <AddToCartAlert /> : null}

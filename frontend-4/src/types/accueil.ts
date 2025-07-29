@@ -54,4 +54,5 @@ export interface User {
   updatedAt?: string | null;
   lastVisit?: string | null;
   isActived?: boolean;
+  points?: number; // Points de fidélité
 }

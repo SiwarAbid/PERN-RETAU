@@ -93,12 +93,11 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
           localStorage.setItem('token', data.token);
           localStorage.setItem('isAuthenticated', 'true');
           localStorage.setItem('user', JSON.stringify(data.user));
-          alert('Bienvenue dans notre cuisine ! 👨‍🍳');
-          if (localStorage.getItem('token') === data.token && data.role == 'CLIENT')
+          console.log('User data:', data.user);
+          if (data.user.role == 'CLIENT')
             navigate(`/accueil`);
-          else if (localStorage.getItem('token') === data.token && data.role == 'ADMIN')
+          else if (data.user.role == 'ADMIN')
             navigate('/admin')
-          else throw new Error("Your token is invalid")
           return true;
         } else {
           throw new Error("Réponse inattendue du serveur");
@@ -149,11 +148,13 @@ const AuthCard: React.FC<AuthCardProps> = ({ isDark }) => {
         }
         window.removeEventListener('message', messageListener);
         // alert('Bienvenue dans notre cuisine ! 👨‍🍳');
-        console.log(localStorage.getItem('token') === token && user.role == 'CLIENT')
-        if ( localStorage.getItem('token') === token && user.role == 'CLIENT')
-          navigate(`/accueil`);
-        else throw new Error("Your token is invalid");
+        
+          if (user.role == 'CLIENT')
+            navigate(`/accueil`);
+        
       }
+      else throw new Error("Your token is invalid");
+
     };
     window.addEventListener('message', messageListener);
   }, [authMode, formData, navigate]);

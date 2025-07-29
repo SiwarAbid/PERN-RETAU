@@ -149,7 +149,7 @@ const modalRoot = document.getElementById('root');
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-lg overflow-hidden">
                       <img
-                        src={` ${apiBaseUrl}/uploads/${item.image}`}
+                        src={`${apiBaseUrl}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />

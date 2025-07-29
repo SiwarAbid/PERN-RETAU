@@ -61,10 +61,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('token', data.token);
           localStorage.setItem('isAuthenticated', 'true');
           setUser(data.user);
-          alert('Bienvenue dans notre cuisine ! 👨‍🍳');
-          if (localStorage.getItem('token') === data.token && data.role == 'CLIENT')
+          if (data.role == 'CLIENT')
             navigate(`/accueil`);
-          else if (localStorage.getItem('token') === data.token && data.role == 'ADMIN')
+          else if (data.role == 'ADMIN')
             navigate('/admin')
           else throw new Error("Your token is invalid")
           return true;

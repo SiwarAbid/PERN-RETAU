@@ -14,11 +14,17 @@ router.post('/add-category',upload.single('image'), (req, res, next) => {
   createCategory(req, res).catch(next);
 });
 
-router.get('/categories', getCategories);
+router.get('/categories', (req, res) => {
+  getCategories(req, res)
+});
 router.get('/categorie/:id', (req, res, next) => {
   getCategoryById(req, res).catch(next);
 });
-router.put('/update-categorie/:id', upload.single('image'), updateCategory);
-router.delete('/delete-categorie/:id', deleteCategory);
+router.put('/update-categorie/:id', upload.single('image'), (req, res) => {
+  updateCategory(req, res)
+});
+router.delete('/delete-categorie/:id', (req, res) => {
+  deleteCategory(req, res)
+});
 
 export {router as categoryRouter};

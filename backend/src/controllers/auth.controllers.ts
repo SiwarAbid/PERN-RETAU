@@ -33,7 +33,7 @@ export const register = async (req: Request, res: Response): Promise<void | Resp
 
   } catch (err) {
     console.error("Erreur lors de l'enregistrement :", err);
-    res.status(500).json({ message: 'Erreur interne du serveur.' });
+    return res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
@@ -61,7 +61,7 @@ export async function login (req: Request, res: Response) {
     res.json({ token, user });
   } catch (err) {
     console.error('Erreur dans /login:', err);
-    res.status(500).json({ message: 'Erreur interne du serveur.' });
+    return res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
@@ -92,7 +92,7 @@ const socialAuthCallbackHandler = (strategy: 'google' | 'facebook' | 'apple' | '
 
     // Génération du JWT et envoi au frontend via postMessage
     const token = generateToken({ id: user.id, role: user.role });
-    res.send(`
+    return res.send(`
       <script>
         window.opener.postMessage({ token: '${token}', user: ${JSON.stringify(user)}, success: true }, 'http://localhost:5173/accueil');
         window.close();

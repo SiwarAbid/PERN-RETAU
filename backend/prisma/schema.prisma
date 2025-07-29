@@ -30,6 +30,12 @@ model User {
   isActived  Boolean?
   salary  Float?
   dateEmbauche DateTime? 
+
+  Order Order[]
+
+  Reward Reward[]
+
+  LoyaltyPoint LoyaltyPoint[]
 }
 
 enum Role {
@@ -52,9 +58,9 @@ model Category {
 
 model Dish {
   id          Int     @id @default(autoincrement())
-  name        String
+  name        String  @unique
   description String?
-  price       Float
+  price       Int      // Stocker en centimes
   category    Category @relation(fields: [categoryId], references: [id])
   categoryId  Int
   reviews     Review[]
@@ -62,6 +68,8 @@ model Dish {
   image       String?
   isAvailable Boolean  @default(true)
   rating      Float    @default(0)
+
+  OrderItem OrderItem[]
 }
 
 
@@ -93,10 +101,69 @@ model Contact {
   id        Int     @id @default(autoincrement())
   name      String
   email     String
-  phone     String
+  phone     String?
   subject   String
   message   String
   createdAt DateTime @default(now())
 }
 
+model Order {
+  id          Int      @id @default(autoincrement())
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      Int?
+  totalAmount Int      // Stocker en centimes
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime?
+  items       OrderItem[]
+  payment     Payment?
+  deliveryFee Int      @default(0)
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  dish      Dish    @relation(fields: [dishId], references: [id])
+  dishId    Int
+  quantity  Int
+  price     Int      // Stocker en centimes (prix au moment de la commande)
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     Int @unique
+  amount      Int      // Stocker en centimes
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime?
+  paymentMethod String
+}
+
+model LoyaltyPoint {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  points    Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model Reward {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  type      String   // "plat", "boisson", "dessert", "remise"
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+
+
+
+// Ensure to run `npx prisma generate` after modifying this schema to update the Prisma Client
+// and `npx prisma migrate dev` to apply changes to your database.
+// For more information, visit https://pris.ly/d/prisma-schema
+// This schema is designed to be used with a PostgreSQL database, as specified in the datasource
+// Adjust the provider and URL in the datasource block as needed for your environment.
 
